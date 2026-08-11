@@ -4,6 +4,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
 // タスク用サービス ＆ コンポーネント
 import { fetchWeeklyTasks, createWeeklyTask, deleteWeeklyTaskById } from './services/taskService';
 import WeeklyTaskManager from './components/WeeklyTaskManager';
@@ -12,6 +13,8 @@ import WeeklyTaskManager from './components/WeeklyTaskManager';
 import { fetchCalendarSlots, updateCalendarSlot } from './services/calendarService';
 import WeeklyCalendar from './components/WeeklyCalendar';
 
+// 今日絶対やること コンポーネント
+import TodayTasks from './components/TodayTasks';
 
 export default function Home() {
   // アプリ全体の「データ（状態）」を保持
@@ -36,18 +39,18 @@ export default function Home() {
     setLoading(false);
   };
 
-  // タスクを追加する処理（子コンポーネントから呼ばれる）
+  // タスクを追加する処理（WeeklyTaskManagerから呼ばれる）
   const handleAddTask = async (title) => {
     // 既存の tasks 配列を渡して、被らない色を自動計算させる
-    const newTask = await createWeeklyTask(title, tasks); // 機能ファイルを呼び出す
+    const newTask = await createWeeklyTask(title, tasks); // taskServiceを呼び出す
     if (newTask) {
       setTasks((prevTasks) => [...prevTasks, newTask]); // 画面のリストに追加
     }
   };
 
-  // タスクを削除する処理（子コンポーネントから呼ばれる）
+  // タスクを削除する処理（WeeklyTaskManagerから呼ばれる）
   const handleDeleteTask = async (id) => {
-    const success = await deleteWeeklyTaskById(id); // 機能ファイルを呼び出す
+    const success = await deleteWeeklyTaskById(id); // taskServiceを呼び出す
     if (success) {
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id)); // 画面から削除
       // 削除されたタスクが割り当てられていたカレンダーのマスも同期更新
@@ -84,7 +87,10 @@ export default function Home() {
     <main className="min-h-screen bg-slate-100 py-8 px-4">
       <div className="max-w-xl mx-auto space-y-6">
         
-        {/* 「今週絶対やること」パーツを配置 */}
+        {/* 今日絶対やること (自動抽出表示) */}
+        <TodayTasks calendarSlots={calendarSlots} />
+
+        {/* 今週絶対やること(タスク作成・一覧) */}
         <WeeklyTaskManager
           tasks={tasks}
           onAddTask={handleAddTask}
