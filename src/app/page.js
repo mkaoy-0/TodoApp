@@ -4,30 +4,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// ① 作成したサービス（機能）をインポート
+// タスク用サービス ＆ コンポーネント
 import { fetchWeeklyTasks, createWeeklyTask, deleteWeeklyTaskById } from './services/taskService';
-// ② 作成したコンポーネント（見た目）をインポート
 import WeeklyTaskManager from './components/WeeklyTaskManager';
+
+// カレンダー用サービス ＆ コンポーネント
+import { fetchCalendarSlots, updateCalendarSlot } from './services/calendarService';
+import WeeklyCalendar from './components/WeeklyCalendar';
+
 
 export default function Home() {
   // アプリ全体の「データ（状態）」を保持
   const [tasks, setTasks] = useState([]);
+  const [calendarSlots, setCalendarSlots] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // --- 画面が開いたときに自動実行される処理 ---
   useEffect(() => {
-    loadTasks();
+    loadAllData();
   }, []);
 
-  // 1. データベースからタスクを読み込む
-  const loadTasks = async () => {
+  // データベースからタスクを読み込む
+  const loadAllData = async () => {
     setLoading(true);
-    const data = await fetchWeeklyTasks(); // 機能ファイルを呼び出す
-    setTasks(data);
+    const [tasksData, slotsData] = await Promise.all([
+      fetchWeeklyTasks(),
+      fetchCalendarSlots(),
+    ]);
+    setTasks(tasksData);
+    setCalendarSlots(slotsData);
     setLoading(false);
   };
 
-  // 2. タスクを追加する処理（子コンポーネントから呼ばれる）
+  // タスクを追加する処理（子コンポーネントから呼ばれる）
   const handleAddTask = async (title) => {
     // 既存の tasks 配列を渡して、被らない色を自動計算させる
     const newTask = await createWeeklyTask(title, tasks); // 機能ファイルを呼び出す
@@ -36,11 +45,38 @@ export default function Home() {
     }
   };
 
-  // 3. タスクを削除する処理（子コンポーネントから呼ばれる）
+  // タスクを削除する処理（子コンポーネントから呼ばれる）
   const handleDeleteTask = async (id) => {
     const success = await deleteWeeklyTaskById(id); // 機能ファイルを呼び出す
     if (success) {
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id)); // 画面から削除
+      // 削除されたタスクが割り当てられていたカレンダーのマスも同期更新
+      setCalendarSlots((prev) =>
+        prev.map((slot) =>
+          slot.weekly_task_id === id
+            ? { ...slot, weekly_task_id: null, weekly_tasks: null } // 削除されたタスクを解除
+            : slot
+        )
+      );
+    }
+  }
+
+  // カレンダーマスの更新
+  const handleSlotChange = async (date, period, weeklyTaskId) => {
+    const updatedSlot = await updateCalendarSlot(date, period, weeklyTaskId);
+    if (updatedSlot) {
+      setCalendarSlots((prev) => {
+        // 既存のスロットリストを更新、無ければ追加する
+        const index = prev.findIndex(
+          (s) => s.date === date && s.period === period
+        );
+        if (index >= 0) {
+          const newSlots = [...prev];
+          newSlots[index] = updatedSlot;
+          return newSlots;
+        }
+        return [...prev, updatedSlot];
+      });
     }
   };
 
@@ -56,7 +92,12 @@ export default function Home() {
           loading={loading}
         />
 
-        {/* 💡 今後ここに「週間カレンダーコンポーネント」や「キャラクター表示コンポーネント」を並べていくだけで拡張できます！ */}
+        {/* 1週間カレンダー パーツ */}
+        <WeeklyCalendar
+          weeklyTasks={tasks}
+          calendarSlots={calendarSlots}
+          onSlotChange={handleSlotChange}
+        />
 
       </div>
     </main>
