@@ -16,6 +16,11 @@ import WeeklyCalendar from './components/WeeklyCalendar';
 // 今日絶対やること コンポーネント
 import TodayTasks from './components/TodayTasks';
 
+// キャラクター＆吹き出し コンポーネント
+import CharacterSection from './components/CharacterSection';
+
+/*--------------------------*/
+
 export default function Home() {
   // アプリ全体の「データ（状態）」を保持
   const [tasks, setTasks] = useState([]);
@@ -87,6 +92,9 @@ export default function Home() {
     <main className="min-h-screen bg-slate-100 py-8 px-4">
       <div className="max-w-xl mx-auto space-y-6">
         
+        {/* キャラクター＆吹き出し */}
+        <CharacterSection calendarSlots={calendarSlots} />
+
         {/* 今日絶対やること (自動抽出表示) */}
         <TodayTasks calendarSlots={calendarSlots} />
 
