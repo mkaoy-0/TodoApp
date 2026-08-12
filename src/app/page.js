@@ -67,7 +67,7 @@ export default function Home() {
     // 既存の tasks 配列を渡して、被らない色を自動計算させる
     const newTask = await createWeeklyTask(title, tasks); // taskServiceを呼び出す
     if (newTask) {
-      setTasks((prevTasks) => [...prevTasks, newTask]); // 画面のリストに追加
+      setTasks((prevTasks) => [newTask, ...prevTasks]); // 画面のリストに追加
     }
   };
 
@@ -124,7 +124,18 @@ export default function Home() {
       /* CSSの dvh ではなく、JSで正確に計算した px 高さを直接指定する */
       className="fixed inset-0 w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border"
       style={{ height: mainHeight }}
-    >      <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
+    >      
+    <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
+
+        {/* クレヨン風の「ゆらぎ・かすれ」を生み出す隠しSVGフィルター */}
+        <svg className="hidden" aria-hidden="true">
+          <defs>
+            <filter id="crayon-filter">
+              <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="1" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </defs>
+        </svg>
 
         {/* ==========================================
             上部エリア (高さ約80%): 常に横並び配置
