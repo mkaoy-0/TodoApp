@@ -106,7 +106,7 @@ export default function Home() {
 
   return (
     /* h-screen（100vh）と overflow-hidden で画面全体の縦スクロールを完全に禁止 */
-    <main className="h-dvh w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border">
+    <main className="fixed inset-0 h-dvh w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border">
       <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
         
         {/* ==========================================
