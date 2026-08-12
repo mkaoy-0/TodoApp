@@ -1,5 +1,5 @@
 // src/app/components/WeeklyCalendar.js
-// 【役割】横7マス×縦3行の1週間カレンダーを表示し、タスクの割り当てを行う見た目パーツ
+// 【役割】SVGフィルターを活用し、切れ目のない綺麗な手描きクレヨン線を表現するカレンダー
 
 'use client';
 
@@ -12,12 +12,10 @@ const PERIODS = [
   { key: 'night', label: '夜' },
 ];
 
-export default function WeeklyCalendar({ weeklyTasks, calendarSlots, onSlotChange }) {
-  // 今週の月曜日から日曜日までの7日間の日付データを動的に計算生成
+export default function WeeklyCalendar({ weeklyTasks, calendarSlots, onSlotChange, selectedTaskId }) {
   const weekDays = useMemo(() => {
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0:日, 1:月...
-    // 月曜日を起点にするための差分計算
+    const dayOfWeek = now.getDay();
     const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     
     const monday = new Date(now);
@@ -30,7 +28,6 @@ export default function WeeklyCalendar({ weeklyTasks, calendarSlots, onSlotChang
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       
-      // 'YYYY-MM-DD' 形式の文字列を作成
       const dateString = d.toISOString().split('T')[0];
       
       days.push({
@@ -43,89 +40,128 @@ export default function WeeklyCalendar({ weeklyTasks, calendarSlots, onSlotChang
     return days;
   }, []);
 
-  // 特定の日付(dateStr)と時間帯(period)にセットされているスロットを探すヘルパー関数
   const getSlot = (dateStr, periodKey) => {
     return calendarSlots.find(
       (slot) => slot.date === dateStr && slot.period === periodKey
     );
   };
 
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 overflow-x-auto">
-      <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-slate-800">
-        <span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span>
-        1週間カレンダー
-      </h2>
+  // マス目がクリックされたときの処理
+  const handleCellClick = (dateStr, periodKey, currentSlot) => {
+    if (selectedTaskId !== null && selectedTaskId !== undefined) {
+      const currentTaskId = currentSlot?.weekly_task_id ? Number(currentSlot.weekly_task_id) : null;
+      const targetTaskId = Number(selectedTaskId);
 
-      {/* 横スクロール可能な 7マス × 3行 のテーブルレイアウト */}
-      <div className="min-w-[650px]">
-        {/* ヘッダー行：曜日と日付 */}
-        <div className="grid grid-cols-8 gap-2 mb-2 text-center text-sm font-bold text-slate-600">
-          <div className="py-2">区分</div>
-          {weekDays.map((day) => (
+      // 同じタスクがすでにあれば解除(null)、違えば上書き登録
+      const newTaskId = currentTaskId === targetTaskId ? null : targetTaskId;
+      onSlotChange(dateStr, periodKey, newTaskId);
+    } else if (currentSlot?.weekly_task_id) {
+      // タスク未選択時に登録済みマスを押すと解除
+      onSlotChange(dateStr, periodKey, null);
+    }
+    //console.log("aaa");
+  };
+
+  return (
+  /* 外枠：クリーム色のノート地に青/グレーの横罫線を繰り返す指定 ★ */
+  <div 
+    className="rounded-sm shadow-sm p-1 sm:p-1.5 h-full flex flex-col justify-between overflow-hidden relative bg-amber-50/40"
+    style={{
+      backgroundImage: 'repeating-linear-gradient(to bottom, transparent, transparent 14px, rgba(139, 127, 100, 0.1) 14px, rgba(139, 127, 100, 0.1) 15px)',
+      backgroundPosition: 'center',
+      backgroundSize: 'calc(100% - 48px) 100%',
+      backgroundRepeat: 'repeat-y',
+    }}
+  >
+    {/* クレヨン風の「ゆらぎ・かすれ」を生み出す隠しSVGフィルター */}
+    <svg className="hidden" aria-hidden="true">
+      <defs>
+        <filter id="crayon-filter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="1" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+
+    {/* 外枠（上と左の閉じる線） */}
+    <div 
+      className="w-full h-full flex flex-col justify-between border-t-2 border-l-2 border-slate-800/80"
+      style={{ filter: 'url(#crayon-filter)' }}
+    >
+      
+      {/* 1. 曜日ヘッダー行 */}
+      <div className="grid grid-cols-7 gap-0 text-center text-[9px] sm:text-xs font-bold text-slate-700">
+        {weekDays.map((day) => {
+          // 土日の文字色判定
+          let textColorClass = 'text-slate-700';
+          if (day.dayName === '土') textColorClass = 'text-blue-600 font-extrabold';
+          if (day.dayName === '日') textColorClass = 'text-red-500 font-extrabold';
+
+          return (
             <div
               key={day.dateStr}
-              className={`py-2 rounded-lg ${
-                day.isToday ? 'bg-indigo-50 text-indigo-600 border border-indigo-200' : 'bg-slate-50'
+              className={`py-1 border-r-2 border-b-2 border-slate-800/80 relative bg-white/30 ${textColorClass} ${
+                day.isToday ? 'font-black' : ''
               }`}
             >
+              {/* 今日の場合のみ左上にピン画像を表示 */}
+              {day.isToday && (
+                <img 
+                  src="/pin_2.png" 
+                  alt="Pin" 
+                  className="absolute 
+                  -top-2 -left-1 w-8.5 h-6 
+                  sm:-top-2.5 sm:-left-2 sm:w-10 sm:h-8 
+                  drop-shadow-sm pointer-events-none z-10 object-contain"
+                />
+              )}
               <div>{day.dayName}</div>
-              <div className="text-xs font-normal text-slate-400">{day.displayDate}</div>
+              <div className="text-[8px] sm:text-[10px] font-normal text-slate-500">
+                {day.displayDate}
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* ボディ行：午前 / 午後 / 夜 の 3行 */}
-        {PERIODS.map((period) => (
-          <div key={period.key} className="grid grid-cols-8 gap-2 mb-2 items-center">
-            {/* 左端：時間帯ラベル */}
-            <div className="text-xs font-bold text-slate-500 text-center py-3 bg-slate-50 rounded-lg">
-              {period.label}
-            </div>
-
-            {/* 各曜日 7マス */}
-            {weekDays.map((day) => {
-              const currentSlot = getSlot(day.dateStr, period.key);
-              const assignedTask = currentSlot?.weekly_tasks;
-
-              return (
-                <div key={`${day.dateStr}-${period.key}`} className="relative group">
-                  <select
-                    value={currentSlot?.weekly_task_id || ''}
-                    onChange={(e) => {
-                      const taskId = e.target.value ? Number(e.target.value) : null;
-                      onSlotChange(day.dateStr, period.key, taskId);
-                    }}
-                    className={`w-full h-14 text-xs p-1.5 rounded-xl border text-center font-medium appearance-none cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                      assignedTask
-                        ? 'text-white border-transparent shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-400 hover:bg-slate-100'
-                    }`}
-                    style={
-                      assignedTask?.color
-                        ? { backgroundColor: assignedTask.color }
-                        : {}
-                    }
-                  >
-                    <option value="" className="text-slate-700 bg-white">
-                      (未設定)
-                    </option>
-                    {weeklyTasks.map((task) => (
-                      <option
-                        key={task.id}
-                        value={task.id}
-                        className="text-slate-700 bg-white"
-                      >
-                        {task.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* 2. データ行（午前・午後・夜 の 3行） */}
+      {PERIODS.map((period) => (
+        <div key={period.key} className="grid grid-cols-7 gap-0 items-center">
+          {weekDays.map((day) => {
+            const currentSlot = getSlot(day.dateStr, period.key);
+            const assignedTask = currentSlot?.weekly_tasks;
+
+            return (
+              <div
+                key={`${day.dateStr}-${period.key}`}
+                /* マス目をクリックした時のイベント */
+                onClick={() => handleCellClick(day.dateStr, period.key, currentSlot)}
+                className={`border-r-2 border-b-2 border-slate-800/80 h-7 sm:h-8 flex items-center justify-center relative cursor-pointer transition select-none ${
+                  selectedTaskId !== null ? 'hover:bg-amber-200/50' : 'hover:bg-slate-200/30'
+                }`}
+                style={
+                  assignedTask?.color
+                    ? { backgroundColor: assignedTask.color }
+                    : {}
+                }
+              >
+                {/* タスク名を表示（選択されたタスクがある場合は白文字） */}
+                {assignedTask ? (
+                  <span className="text-[9px] sm:text-xs font-bold text-white truncate px-0.5">
+                    {assignedTask.title}
+                  </span>
+                ) : (
+                  <span className="text-[9px] text-slate-300 italic opacity-0 hover:opacity-100">
+                    {selectedTaskId ? '＋' : ''}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
+
     </div>
-  );
+  </div>
+);
 }

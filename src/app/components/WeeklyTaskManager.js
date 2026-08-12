@@ -6,86 +6,91 @@
 import { useState } from 'react';
 
 
-export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, loading }) {
-  // --- ローカル（画面内一時的）な状態の管理 ---
-  const [inputText, setInputText] = useState(''); // 入力欄の文字
+export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, loading, selectedTaskId, onSelectTask }) {
+    // --- ローカル（画面内一時的）な状態の管理 ---
+    const [inputText, setInputText] = useState(''); // 入力欄の文字
 
-  // --- 送信ボタンが押された時の処理 ---
-  const handleSubmit = (e) => {
-    e.preventDefault(); // フォーム送信時のページ再読み込み（リロード）を防止
-    if (!inputText.trim()) return;
+    // --- 送信ボタンが押された時の処理 ---
+    const handleSubmit = (e) => {
+        e.preventDefault(); // フォーム送信時のページ再読み込み（リロード）を防止
+        if (!inputText.trim()) return;
 
-    // 親（page.js）から渡された追加関数を実行
-    onAddTask(inputText);
-    
-    // 入力欄をクリア
-    setInputText('');
-  };
+        // 親（page.js）から渡された追加関数を実行
+        onAddTask(inputText);
 
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-      {/* 見出し */}
-      <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-slate-800">
-        <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
-        今週絶対やること
-      </h2>
+        // 入力欄をクリア
+        setInputText('');
+    };
 
-      {/* --- 入力フォームエリア --- */}
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-        {/* タスク名入力欄 ＋ 追加ボタン */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)} // 文字が打たれるたびに状態を更新
-            placeholder="新しいやることを入力..."
-            className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-          />
-          <button
-            type="submit"
-            className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition shadow-sm active:scale-95"
-          >
-            追加
-          </button>
-        </div>
-      </form>
+    return (
+        /* h-full と flex flex-col で「高さ100%」を使って縦いっぱいに広げる */
+        <div className="h-full flex flex-col">
+            {/* タスク一覧：flex-1 であまりの高さを100%使い切り、溢れたら overflow-y-auto でスクロール */}
+            <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 min-h-0 ml-1.5">
+                {loading ? (
+                    <p className="text-center text-slate-400 py-2 text-xs">読み込み中...</p>
+                ) : tasks.length === 0 ? (
+                    <p className="text-center text-slate-400 py-2 text-xs">まだ登録されていません</p>
+                ) : (
+                    tasks.map((task) => {
+                        const isSelected = selectedTaskId === task.id;
 
-      {/* --- タスク一覧表示エリア --- */}
-      {loading ? (
-        <p className="text-center text-slate-400 py-4 text-sm">読み込み中...</p>
-      ) : tasks.length === 0 ? (
-        <p className="text-center text-slate-400 py-4 text-sm">
-          まだ今週やるデータが登録されていません
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {/* 配列データを1つずつ取り出してリスト項目を作る */}
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/60 transition hover:bg-slate-100/80"
-            >
-              <div className="flex items-center gap-3">
-                {/* 自動計算された HSL カラーを style で直接適用 */}
-                <span
-                  className="w-3.5 h-3.5 rounded-full shrink-0"
-                  style={{ backgroundColor: task.color || '#3b82f6' }}
-                />
-                <span className="font-medium text-slate-700">{task.title}</span>
-              </div>
+                        return (
+                            <div
+                                key={task.id}
+                                /* クリックで選択・解除をトグル */
+                                onClick={(e) => {
+                                    e.stopPropagation(); // イベントバブリングを防止
+                                    onSelectTask(task.id);
+                                }}
+                                className={`flex items-start justify-between p-2 rounded-sm text-xs shrink-0 gap-2 cursor-pointer transition-all duration-150 select-none ${isSelected
+                                        ? 'ring-2 ring-amber-400 ring-offset-2 shadow-md scale-[1.02]' // ★ 選択中の強調デザイン
+                                        : 'shadow-sm hover:brightness-95'
+                                    }`}
+                                style={{ backgroundColor: task.color || '#3b82f6' }}
+                            >
+                                <div className="flex items-start gap-2 flex-1 min-w-0">
+                                    <span className="font-medium break-words flex-1 leading-snug px-2 text-slate-900">
+                                        {task.title}
+                                    </span>
+                                </div>
 
-              {/* 削除ボタン */}
-              <button
-                onClick={() => onDeleteTask(task.id)} // 親の削除関数を実行
-                className="text-slate-400 hover:text-red-500 px-2 py-1 text-sm transition"
-                title="削除"
-              >
-                ✕
-              </button>
+                                {/* 削除ボタン */}
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        /* ★ e.stopPropagation() でカード全体のクリック(選択処理)を発火させない ★ */
+                                        e.stopPropagation();
+                                        onDeleteTask(task.id);
+                                    }}
+                                    className="text-slate-700 hover:text-red-600 px-1 text-xs transition font-bold shrink-0"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        );
+                    })
+                )}
             </div>
-          ))}
+
+            {/* 入力フォーム */}
+            <form onSubmit={handleSubmit} className="mt-2 mb-2">
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="新しいやることを追加..."
+                        className="flex-1 px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-1.5 text-xs bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition active:scale-95 shrink-0"
+                    >
+                        ＋
+                    </button>
+                </div>
+            </form>
         </div>
-      )}
-    </div>
-  );
+    );
 }

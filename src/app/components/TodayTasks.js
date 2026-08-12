@@ -39,51 +39,51 @@ export default function TodayTasks({ calendarSlots }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-      {/* 見出し */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
-          <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-          今日絶対やること
-        </h2>
-        <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+    <div>
+      {/* 本日の日付表示バッジ */}
+      <div className="flex items-center justify-between mb-2">
+        <span 
+          className="inline-block -rotate-5 mt-3
+          text-[11px] font-bold text-emerald-700 
+          bg-emerald-100 px-4.5 py-1.5 rounded-sm shadow-sm"
+        >
+          本日の予定
+        </span>
+        <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
           {formattedToday}
         </span>
       </div>
 
-      {/* 午前・午後・夜 の 3分割表示カード */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* 朝・昼・夜 の 3分割カード */}
+      <div className="flex-1 flex flex-col justify-around gap-2.5 min-h-0 overflow-y-auto">
         {PERIODS.map((period) => {
           const task = getTodayTaskForPeriod(period.key);
 
           return (
             <div
               key={period.key}
-              className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between transition hover:border-slate-300"
+              className="p-2 sm:p-2.5 rounded-xl 
+              flex flex-col justify-center gap-3 text-xs h-auto shrink-0"
             >
-              {/* 時間帯ヘッダー */}
-              <div className="flex items-center gap-2 mb-2 text-xs font-bold text-slate-500">
-                <span>{period.icon}</span>
+              {/* 上段：時間帯名 */}
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                 <span>{period.label}</span>
               </div>
 
-              {/* タスク内容表示エリア */}
-              <div className="mt-1">
+              {/* 下段：タスク表示エリア */}
+              <div className="w-full pl-1">
                 {task ? (
-                  <div className="flex items-center gap-2.5">
-                    {/* タスク設定色付き丸バッジ */}
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
+                  <div className="flex items-start gap-1.5">
+                    <span 
+                      className="font-semibold text-slate-800 text-xs leading-snug break-words flex-1
+                      px-4 py-1.5 rounded-sm shadow-sm"
                       style={{ backgroundColor: task.color || '#3b82f6' }}
-                    />
-                    <span className="font-semibold text-slate-800 text-sm line-clamp-1">
+                    >
                       {task.title}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs text-slate-400 italic">
-                    予定なし
-                  </span>
+                  <span className="text-[11px] text-slate-300 italic">お休み</span>
                 )}
               </div>
             </div>

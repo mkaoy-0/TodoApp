@@ -42,22 +42,16 @@ export default function CharacterSection({ calendarSlots }) {
   }, [calendarSlots, todayStr]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center gap-5">
-      {/* キャラクターアイコン（アバター風イラスト） */}
-      <div className="relative shrink-0">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-amber-200 to-amber-100 border-2 border-amber-300 flex items-center justify-center text-3xl sm:text-4xl shadow-inner select-none">
-          🐱
-        </div>
-        <span className="absolute -bottom-1 -right-1 bg-emerald-500 w-4 h-4 rounded-full border-2 border-white" title="オンライン" />
+    /* h-full で左側エリアの高さを100%使い切り、PCでは縦並び・スマホでは横並びに最適化 */
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 sm:p-4 h-full flex flex-row md:flex-col items-center justify-center gap-3 overflow-hidden">
+      {/* キャライコン（画面の大きさに合わせて拡大縮小） */}
+      <div className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-tr from-amber-200 to-amber-100 border border-amber-300 flex items-center justify-center text-xl sm:text-2xl md:text-3xl shrink-0 select-none">
+        🐱
       </div>
 
-      {/* 吹き出し（セリフ表示エリア） */}
-      <div className="relative flex-1 bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-slate-700 text-xs sm:text-sm font-medium leading-relaxed">
-        {/* 吹き出しの左三角形ノズル */}
-        <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-slate-200/80" />
-        <div className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[7px] border-y-transparent border-r-[7px] border-r-slate-50" />
-
-        <p className="text-slate-800">{dialogueMessage}</p>
+      {/* 吹き出し（スマホでは小さめの文字 text-[10px] に可変） */}
+      <div className="relative w-full bg-slate-50 border border-slate-200/80 rounded-lg sm:rounded-xl p-2 text-[10px] sm:text-xs md:text-sm font-medium text-slate-800 leading-snug sm:leading-relaxed text-center overflow-y-auto max-h-[60%]">
+        {dialogueMessage}
       </div>
     </div>
   );
