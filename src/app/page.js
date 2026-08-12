@@ -29,7 +29,8 @@ export default function Home() {
   // 選択中のタスクID（選択なしは null）
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-
+  // 画面の「実際の表示高さ(px)」を保持する state
+  const [mainHeight, setMainHeight] = useState('100dvh');
 
   // データベースからタスクを読み込む
   const loadAllData = async () => {
@@ -43,9 +44,22 @@ export default function Home() {
     setLoading(false);
   };
 
-    // --- 画面が開いたときに自動実行される処理 ---
+  // --- 画面が開いたときに自動実行される処理 ---
   useEffect(() => {
     loadAllData();
+
+    // 2. 画面の実際の表示高さを正確に計算してセットする処理
+    const updateHeight = () => {
+      if (typeof window !== 'undefined') {
+        setMainHeight(`${window.innerHeight}px`);
+      }
+    };
+
+    updateHeight();
+
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+
   }, []);
 
   // タスクを追加する処理（WeeklyTaskManagerから呼ばれる）
@@ -106,15 +120,18 @@ export default function Home() {
 
   return (
     /* h-screen（100vh）と overflow-hidden で画面全体の縦スクロールを完全に禁止 */
-    <main className="fixed inset-0 h-dvh w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border">
-      <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
-        
+    <main
+      /* CSSの dvh ではなく、JSで正確に計算した px 高さを直接指定する */
+      className="fixed inset-0 w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border"
+      style={{ height: mainHeight }}
+    >      <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
+
         {/* ==========================================
             上部エリア (高さ約80%): 常に横並び配置
             【キャラ (30%)】【やること (70%)】
            ========================================== */}
-        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-0 overflow-hidden">          
-          
+        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-0 overflow-hidden">
+
           {/* 左側: キャラクター (横幅30%〜35%) */}
           <div className="w-[32%] sm:w-[30%] h-full min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
@@ -128,8 +145,8 @@ export default function Home() {
               onAddTask={handleAddTask}
               onDeleteTask={handleDeleteTask}
               loading={loading}
-              selectedTaskId={selectedTaskId} 
-              onSelectTask={handleSelectTask} 
+              selectedTaskId={selectedTaskId}
+              onSelectTask={handleSelectTask}
               onClearSelection={handleClearSelection}
             />
           </div>
