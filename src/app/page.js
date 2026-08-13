@@ -143,7 +143,7 @@ export default function Home() {
           上部エリア (キャラ ＆ やること):
           十分な高さがある時は画面いっぱいに広がり(flex-1)
          ========================================== */}
-        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-[500px] overflow-hidden">
+        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
           <div className="h-full aspect-[2/5] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
@@ -171,7 +171,7 @@ export default function Home() {
           下部エリア: 1週間カレンダー
           スクロールさせず、本来の最適な高さで固定（shrink-0）
          ========================================== */}
-        <div className="flex-1 min-h-[100px] w-full">
+        <div className="w-full shrink-0 h-auto min-h-[110px]">
           <WeeklyCalendar
             weeklyTasks={tasks}
             calendarSlots={calendarSlots}
