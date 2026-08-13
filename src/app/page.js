@@ -119,15 +119,11 @@ export default function Home() {
   };
 
   return (
-    /* h-screen（100vh）と overflow-hidden で画面全体の縦スクロールを完全に禁止 */
-    <main
-      /* CSSの dvh ではなく、JSで正確に計算した px 高さを直接指定する */
-      className="fixed inset-0 w-full bg-slate-100 p-2 sm:p-4 overflow-hidden flex flex-col justify-between box-border"
-      style={{ height: mainHeight }}
-    >      
-    <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-2 sm:gap-3">
+    /* ★ fixed inset-0 と overflow-hidden を外し、min-h-screen で溢れたら全体スクロール可能にする */
+    <main className="h-screen w-full bg-slate-100 p-2 sm:p-4 flex flex-col justify-between box-border overflow-hidden">
+      <div className="max-w-5xl mx-auto w-fullh-full flex flex-col gap-2 sm:gap-3 min-h-0">
 
-        {/* クレヨン風の「ゆらぎ・かすれ」を生み出す隠しSVGフィルター */}
+        {/* 隠しSVGフィルター */}
         <svg className="hidden" aria-hidden="true">
           <defs>
             <filter id="crayon-filter">
@@ -138,18 +134,19 @@ export default function Home() {
         </svg>
 
         {/* ==========================================
-            上部エリア (高さ約80%): 常に横並び配置
-            【キャラ (30%)】【やること (70%)】
-           ========================================== */}
+          上部エリア (キャラ ＆ やること):
+          十分な高さがある時は画面いっぱいに広がり(flex-1)、
+          画面が潰れたら最小高さを保持(min-h-[300px])
+         ========================================== */}
         <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-0 overflow-hidden">
-
-          {/* 左側: キャラクター (横幅30%〜35%) */}
-          <div className="w-[32%] sm:w-[30%] h-full min-h-0">
+          
+          {/* 左側: キャラクター */}
+          <div className="h-full aspect-[2/5] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
           </div>
 
-          {/* 右側: やることコンテナ (横幅68%〜70%) */}
-          <div className="w-[68%] sm:w-[70%] h-full min-h-0">
+          {/* 右側: やることコンテナ */}
+          <div className="flex-1 min-w-0 h-full">
             <TaskContainer
               tasks={tasks}
               calendarSlots={calendarSlots}
@@ -165,8 +162,9 @@ export default function Home() {
         </div>
 
         {/* ==========================================
-            下部エリア: 1週間カレンダー (カレンダー本来の「コンパクトな必要最低限の高さ」で固定)
-           ========================================== */}
+          下部エリア: 1週間カレンダー
+          スクロールさせず、本来の最適な高さで固定（shrink-0）
+         ========================================== */}
         <div className="shrink-0">
           <WeeklyCalendar
             weeklyTasks={tasks}

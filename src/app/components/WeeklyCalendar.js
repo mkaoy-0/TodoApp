@@ -65,11 +65,10 @@ export default function WeeklyCalendar({ weeklyTasks, calendarSlots, onSlotChang
             // タスク未選択時に登録済みマスを押すと解除
             onSlotChange(dateStr, periodKey, null);
         }
-        //console.log("aaa");
     };
 
     return (
-        /* 外枠：クリーム色のノート地に青/グレーの横罫線を繰り返す指定 ★ */
+        /* 外枠：クリーム色のノート地に青/グレーの横罫線を繰り返す指定 */
         <div
             className="rounded-sm shadow-sm p-1 sm:p-1.5 h-full flex flex-col justify-between overflow-hidden relative bg-amber-50/40"
             style={{
