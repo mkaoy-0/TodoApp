@@ -33,7 +33,7 @@ export default function WeeklyCalendar({
     const busyTask = weeklyTasks.find((t) => t.title === '予定あり');
 
     const weekDays = useMemo(() => {
-        const now = new Date();
+        const now = adjustedNow;
         const dayOfWeek = now.getDay();
         const distanceToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 

@@ -15,25 +15,6 @@ const PERIODS = [
 
 /* ★ busySlots = [] を props に追加 */
 export default function TodayTasks({ calendarSlots }) {
-    /*/
-    // 1. 本日の日付文字列 ('YYYY-MM-DD' 形式) を取得
-    const todayStr = useMemo(() => {
-        const now = new Date();
-        // 日本時間の年・月・日を正しくフォーマット
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }, []);
-
-    // 2. 本日の日付のフォーマット表示用 (例: "8月11日 (火)")
-    const formattedToday = useMemo(() => {
-        const now = new Date();
-        const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-        return `${now.getMonth() + 1}月${now.getDate()}日 (${dayNames[now.getDay()]})`;
-    }, []);
-    /**/ 
-
     // 日付 Context から一括取得
     const { todayStr, formattedToday } = useLogicalDate();
 
@@ -50,14 +31,11 @@ export default function TodayTasks({ calendarSlots }) {
             {/* 本日の日付表示バッジ */}
             <div className="flex items-center justify-between mb-2">
                 <span
-                    className="inline-block -rotate-5 mt-3
-          text-[11px] font-bold text-emerald-700 
-          bg-emerald-100 px-4.5 py-1.5 rounded-sm shadow-sm"
+                    className="inline-block -rotate-5 mt-3 mb-3
+                    text-[11px] font-bold text-emerald-700 
+                    bg-emerald-100 px-4.5 py-1.5 rounded-sm shadow-sm"
                 >
-                    今日の予定
-                </span>
-                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                    {formattedToday}
+                    {formattedToday} の予定
                 </span>
             </div>
 
