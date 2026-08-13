@@ -145,7 +145,7 @@ export default function Home() {
          ========================================== */}
         <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
-          <div className="h-full aspect-[2/5] shrink-0 min-h-0 max-h-[480px]">
+          <div className="h-full aspect-[2/5] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
           </div>
 
@@ -171,7 +171,7 @@ export default function Home() {
           下部エリア: 1週間カレンダー
           スクロールさせず、本来の最適な高さで固定（shrink-0）
          ========================================== */}
-        <div className="w-full shrink-0 h-auto min-h-[110px]">
+        <div className="flex-1 min-h-[110px] w-full">
           <WeeklyCalendar
             weeklyTasks={tasks}
             calendarSlots={calendarSlots}
