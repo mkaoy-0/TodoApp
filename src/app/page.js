@@ -122,12 +122,11 @@ export default function Home() {
   };
 
   return (
-    /* ★ 変更：
-       1. h-screen で画面に収める（スクロールなし）を基本にする
-       2. min-h-[640px] で「4枚目」のサイズを最小防波堤として固定
-       3. 画面が640pxを下回ったら overflow-y-auto で全体スクロール発動
-    */
-    <main className="h-screen min-h-[350px] w-full bg-slate-100 p-2 sm:p-4 flex flex-col box-border overflow-y-auto">
+    /* h-screen の代わりに style={{ height: mainHeight }} を適用 */
+    <main
+      className="w-full bg-slate-100 p-2 sm:p-4 flex flex-col box-border overflow-y-auto"
+      style={{ height: mainHeight }}
+    >      
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-2 sm:gap-3 min-h-[480px]">
         {/* 隠しSVGフィルター */}
         <svg className="hidden" aria-hidden="true">
