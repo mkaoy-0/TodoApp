@@ -32,6 +32,9 @@ export default function Home() {
   // 画面の「実際の表示高さ(px)」を保持する state
   const [mainHeight, setMainHeight] = useState('100dvh');
 
+  // タブの状態を親で管理
+  const [activeTab, setActiveTab] = useState('today');
+
   // データベースからタスクを読み込む
   const loadAllData = async () => {
     setLoading(true);
@@ -119,10 +122,13 @@ export default function Home() {
   };
 
   return (
-    /* ★ fixed inset-0 と overflow-hidden を外し、min-h-screen で溢れたら全体スクロール可能にする */
-    <main className="h-screen w-full bg-slate-100 p-2 sm:p-4 flex flex-col justify-between box-border overflow-hidden">
-      <div className="max-w-5xl mx-auto w-fullh-full flex flex-col gap-2 sm:gap-3 min-h-0">
-
+    /* ★ 変更：
+       1. h-screen で画面に収める（スクロールなし）を基本にする
+       2. min-h-[640px] で「4枚目」のサイズを最小防波堤として固定
+       3. 画面が640pxを下回ったら overflow-y-auto で全体スクロール発動
+    */
+    <main className="h-screen min-h-[350px] w-full bg-slate-100 p-2 sm:p-4 flex flex-col box-border overflow-y-auto">
+      <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-2 sm:gap-3 min-h-[480px]">
         {/* 隠しSVGフィルター */}
         <svg className="hidden" aria-hidden="true">
           <defs>
@@ -135,11 +141,9 @@ export default function Home() {
 
         {/* ==========================================
           上部エリア (キャラ ＆ やること):
-          十分な高さがある時は画面いっぱいに広がり(flex-1)、
-          画面が潰れたら最小高さを保持(min-h-[300px])
+          十分な高さがある時は画面いっぱいに広がり(flex-1)
          ========================================== */}
-        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-0 overflow-hidden">
-          
+        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
           <div className="h-full aspect-[2/5] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
@@ -156,6 +160,8 @@ export default function Home() {
               selectedTaskId={selectedTaskId}
               onSelectTask={handleSelectTask}
               onClearSelection={handleClearSelection}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
             />
           </div>
 
@@ -165,12 +171,13 @@ export default function Home() {
           下部エリア: 1週間カレンダー
           スクロールさせず、本来の最適な高さで固定（shrink-0）
          ========================================== */}
-        <div className="shrink-0">
+        <div className="flex-1 min-h-[110px] w-full">
           <WeeklyCalendar
             weeklyTasks={tasks}
             calendarSlots={calendarSlots}
             onSlotChange={handleSlotChange}
             selectedTaskId={selectedTaskId}
+            isEditable={activeTab !== 'today'}
           />
         </div>
 

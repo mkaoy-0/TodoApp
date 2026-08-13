@@ -29,8 +29,8 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
             <form onSubmit={handleSubmit} className="mt-0 mb-2.5">
                 <div className="flex gap-2">
                     {/* 付箋風の親コンテナ（影と左端の縦帯、角丸をここで管理） */}
-                    <div 
-                      className="relative inlineb-lock -rotate-1 -bottom-1 left-1
+                    <div
+                        className="relative inlineb-lock -rotate-1 -bottom-1 left-1
                       flex-1 flex items-center 
                       bg-white shadow-sm border border-slate-200/80 overflow-hidden 
                       focus-within:ring-1 focus-within:ring-slate-300 transition"
@@ -49,7 +49,7 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                     </div>
                     <button
                         type="submit"
-                        className="translate-y-1.5 px-3 py-2 text-xs 
+                        className="translate-y-1.5 px-2 py-1 text-base 
                         border-2 border-blue-400/80 rounded-sm hover:bg-slate-200 
                         text-blue-400/80 font-bold transition active:scale-95 shrink-0"
                         style={{ filter: 'url(#crayon-filter)' }}
@@ -63,10 +63,15 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
             <div className="flex-1 overflow-y-auto space-y-3 pt-1.5 pb-3 pr-1 min-h-0 ml-1.5 mt-2">
                 {loading ? (
                     <p className="text-center text-slate-400 py-2 text-xs">読み込み中...</p>
-                ) : tasks.length === 0 ? (
-                    <p className="text-center text-slate-400 py-2 text-xs">まだ登録されていません</p>
-                ) : (
-                    tasks.map((task) => {
+                ) : (() => {
+                    /* ★ 「予定あり」以外のタスクだけに絞り込む */
+                    const displayTasks = tasks.filter((task) => task.title !== '予定あり');
+
+                    if (displayTasks.length === 0) {
+                        return <p className="text-center text-slate-400 py-2 text-xs">まだ登録されていません</p>;
+                    }
+
+                    return displayTasks.map((task) => {
                         const isSelected = selectedTaskId === task.id;
 
                         return (
@@ -103,8 +108,8 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                                 </button>
                             </div>
                         );
-                    })
-                )}
+                    });
+                })()}
             </div>
         </div>
     );

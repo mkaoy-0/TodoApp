@@ -17,8 +17,10 @@ export default function TaskContainer({
     selectedTaskId, 
     onSelectTask,
     onClearSelection,
+    activeTab,
+    setActiveTab,
 }) {
-    const [activeTab, setActiveTab] = useState('today');
+   // const [activeTab, setActiveTab] = useState('today');
 
 
     return (
@@ -97,6 +99,7 @@ export default function TaskContainer({
                             loading={loading}
                             selectedTaskId={selectedTaskId}
                             onSelectTask={onSelectTask}
+                            isEditable={true} // 『今週やること』タブのみ編集可能
                         />
                     )}
                 </div>

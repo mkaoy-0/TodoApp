@@ -15,37 +15,55 @@ export default function CharacterSection({ calendarSlots }) {
         return `${year}-${month}-${day}`;
     }, []);
 
-    // 今日のタスク数と時間帯をもとに、キャラクターのセリフを自動計算
-    const dialogueMessage = useMemo(() => {
-        const now = new Date();
-        const currentHour = now.getHours();
+    // 今日の [朝, 昼, 夜] のタスク名を順番通りに格納した配列を作る
+    const todayTaskNames = useMemo(() => {
+        if (!calendarSlots) return [null, null, null];
 
-        // 今日のスロットでタスクが割り当てられているものを数える
-        const todaySlots = calendarSlots.filter(
-            (s) => s.date === todayStr && s.weekly_task_id !== null
-        );
-        const taskCount = todaySlots.length;
+        const periods = ['morning', 'afternoon', 'night'];
 
-        if (taskCount === 3) {
-            return '今日の予定はバッチリ決まってるね！集中してひとつずつクリアしていこう！🔥';
-        } else if (taskCount > 0) {
-            return '順調だね！カレンダーの空いてる時間帯も埋めてみない？✨';
-        } else {
-            if (currentHour < 12) {
-                return 'おはよう！今日も1日マイペースに頑張っていこう〜！☀️';
-            } else if (currentHour < 18) {
-                return 'こんにちは！カレンダーに今週絶対やることを割り振ってみてね！みてるよ👀';
-            } else {
-                return '今日もおつかれさま！明日の予定をカレンダーでセットしておこう準備はバッチリ？🌙';
-            }
-        }
+        return periods.map((p) => {
+            // 今日の日付 かつ 指定の時間帯（morning / afternoon / night）のスロットを探す
+            const slot = calendarSlots.find(
+                (s) => s.date === todayStr && s.period === p
+            );
+            // タスク名があれば返し、無ければ null を返す
+            return slot?.weekly_tasks?.title || null;
+        });
     }, [calendarSlots, todayStr]);
+
+    // 現在時刻のインデックスに応じたタスク名を出力
+    const dialogueMessage = useMemo(() => {
+        const hour = new Date().getHours();
+        let hour_morning = 6; // 6:00 - 14:00
+        let hour_afternoon = 14; // 14:00 - 20:00
+        let hour_night = 20; // 20:00 - 6:00
+
+        // 時間帯に応じたインデックス判定（0: 朝, 1: 昼, 2: 夜）
+        let index = 0; 
+        if (hour >= hour_afternoon && hour < hour_night) {
+            index = 1; 
+        } else if (hour >= hour_night || hour < hour_morning) {
+            index = 2;
+        }
+
+
+        if (todayTaskNames[index] === null) {
+            // タスク設定してないとき
+            return "休憩中...";
+        } else if (todayTaskNames[index] === "予定あり") {
+            // タスクが「予定あり」のとき
+            return "不在中...";
+        } else {
+            return `今は${todayTaskNames[index]}の時間！`;
+        }
+        
+    }, [todayTaskNames]);
 
     return (
         /* h-full で左側エリアの高さを100%使い切り、縦並びに配置 */
         <div className="p-2 sm:p-3 h-full flex flex-col items-center justify-between gap-2 overflow-hidden min-h-0">
             {/* 吹き出し（下部に配置） */}
-            <div className="relative w-full bg-slate-50 border border-slate-200/80 rounded-lg sm:rounded-xl p-2 text-[10px] sm:text-xs md:text-sm font-medium text-slate-800 leading-snug sm:leading-relaxed text-center shrink-0">
+            <div className="relative w-full bg-slate-50 border border-slate-200/80 rounded-lg sm:rounded-xl px-2 py-1.5 text-[10px] sm:text-xs font-medium text-slate-800 leading-snug text-center shrink-0 max-h-[80px] flex items-center justify-center overflow-y-auto">
                 {dialogueMessage}
             </div>
 
