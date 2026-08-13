@@ -4,6 +4,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useLogicalDate } from '../context/DateContext';
 
 // 時間帯の定義（縦3行）
 const PERIODS = [
@@ -19,6 +20,9 @@ export default function WeeklyCalendar({
     selectedTaskId,
     isEditable = true,
 }) {
+    // DateContext から朝6時基準の現在日時(adjustedNow)を取得
+    const { adjustedNow } = useLogicalDate();
+
     // ホバー中のマス（"2026-08-12-morning" のような文字列）を追跡
     const [hoveredSlotKey, setHoveredSlotKey] = useState(null);
 
@@ -43,17 +47,21 @@ export default function WeeklyCalendar({
             const d = new Date(monday);
             d.setDate(monday.getDate() + i);
 
-            const dateString = d.toISOString().split('T')[0];
+            // 日本時間で YYYY-MM-DD を作成
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const dateString = `${year}-${month}-${day}`;
 
             days.push({
                 dateStr: dateString,
                 displayDate: `${d.getMonth() + 1}/${d.getDate()}`,
                 dayName: dayNames[i],
-                isToday: d.toDateString() === now.toDateString(),
+                isToday: d.toDateString() === adjustedNow.toDateString(),
             });
         }
         return days;
-    }, []);
+    }, [adjustedNow]); // adjustedNow が更新されたら再計算
 
     const getSlot = (dateStr, periodKey) => {
         return calendarSlots.find(

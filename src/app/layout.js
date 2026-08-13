@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Yomogi } from 'next/font/google';
 import localFont from 'next/font/local';
 import "./globals.css";
+import { DateProvider } from '@/app/context/DateContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,8 +35,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      {/* フォント.className を body に指定することで、アプリ全体が手書きフォントになります */}
-      <body className={myCustomFont.className}>{children}</body>
+      {/* body に フォント名.className を設定 */}
+      <body className={myCustomFont.className}>
+        {/* children を DateProvider で包む */}
+        <DateProvider>
+          {children}
+        </DateProvider>
+      </body>
     </html>
   );
 }

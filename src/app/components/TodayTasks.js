@@ -4,6 +4,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useLogicalDate } from '@/app/context/DateContext';
 
 // 時間帯の定義と表示用ラベル
 const PERIODS = [
@@ -14,6 +15,7 @@ const PERIODS = [
 
 /* ★ busySlots = [] を props に追加 */
 export default function TodayTasks({ calendarSlots }) {
+    /*/
     // 1. 本日の日付文字列 ('YYYY-MM-DD' 形式) を取得
     const todayStr = useMemo(() => {
         const now = new Date();
@@ -30,8 +32,12 @@ export default function TodayTasks({ calendarSlots }) {
         const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
         return `${now.getMonth() + 1}月${now.getDate()}日 (${dayNames[now.getDay()]})`;
     }, []);
+    /**/ 
 
-    // 3. 指定した時間帯(periodKey)の今日のタスクデータを取得するヘルパー関数
+    // 日付 Context から一括取得
+    const { todayStr, formattedToday } = useLogicalDate();
+
+    // 指定した時間帯(periodKey)の今日のタスクデータを取得するヘルパー関数
     const getTodayTaskForPeriod = (periodKey) => {
         const slot = calendarSlots.find(
             (s) => s.date === todayStr && s.period === periodKey

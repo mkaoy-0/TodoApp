@@ -4,16 +4,11 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useLogicalDate } from '../context/DateContext';
 
 export default function CharacterSection({ calendarSlots }) {
-    // 今日の日付文字列 ('YYYY-MM-DD') を取得
-    const todayStr = useMemo(() => {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }, []);
+    // Context から朝6時基準の「今日の日付文字列」と「時間帯インデックス (0:朝, 1:昼, 2:夜)」を取得
+    const { todayStr, periodIndex } = useLogicalDate();
 
     // 今日の [朝, 昼, 夜] のタスク名を順番通りに格納した配列を作る
     const todayTaskNames = useMemo(() => {
@@ -33,31 +28,19 @@ export default function CharacterSection({ calendarSlots }) {
 
     // 現在時刻のインデックスに応じたタスク名を出力
     const dialogueMessage = useMemo(() => {
-        const hour = new Date().getHours();
-        let hour_morning = 6; // 6:00 - 14:00
-        let hour_afternoon = 14; // 14:00 - 20:00
-        let hour_night = 20; // 20:00 - 6:00
+        const currentTask = todayTaskNames[periodIndex];
 
-        // 時間帯に応じたインデックス判定（0: 朝, 1: 昼, 2: 夜）
-        let index = 0; 
-        if (hour >= hour_afternoon && hour < hour_night) {
-            index = 1; 
-        } else if (hour >= hour_night || hour < hour_morning) {
-            index = 2;
-        }
-
-
-        if (todayTaskNames[index] === null) {
+        if (currentTask === null) {
             // タスク設定してないとき
             return "休憩中...";
-        } else if (todayTaskNames[index] === "予定あり") {
+        } else if (currentTask === "予定あり") {
             // タスクが「予定あり」のとき
             return "不在中...";
         } else {
-            return `今は${todayTaskNames[index]}の時間！`;
+            return `今は${currentTask}の時間！`;
         }
         
-    }, [todayTaskNames]);
+    }, [todayTaskNames, periodIndex]);
 
     return (
         /* h-full で左側エリアの高さを100%使い切り、縦並びに配置 */
