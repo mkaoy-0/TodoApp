@@ -90,6 +90,7 @@ export default function TaskContainer({
                     {activeTab === 'today' ? (
                         <TodayTasks
                             calendarSlots={calendarSlots}
+                            loading={loading}
                         />
                     ) : (
                         <WeeklyTaskManager

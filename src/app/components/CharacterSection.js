@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { useLogicalDate } from '../context/DateContext';
 
-export default function CharacterSection({ calendarSlots }) {
+export default function CharacterSection({ calendarSlots, loading }) {
     // Context から朝6時基準の「今日の日付文字列」と「時間帯インデックス (0:朝, 1:昼, 2:夜)」を取得
     const { todayStr, periodIndex } = useLogicalDate();
 
@@ -55,24 +55,37 @@ export default function CharacterSection({ calendarSlots }) {
         /* 親要素に relative を指定して、吹き出しの配置基準にする */
         <div className="relative h-full w-full overflow-hidden flex flex-col justify-end -left-1">
 
-            {/* キャラクター画像表示エリア（親の高さ100%を目一杯使って大きく表示） */}
+            {/* キャラクター画像表示エリア */}
             <div className="w-full h-full flex justify-center items-end overflow-hidden">
-                <img
-                    src={characterState.imageSrc}
-                    alt="Character"
-                    className="w-full h-full object-contain object-bottom"
-                />
+                {loading ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                        {/* 回転スピナー */}
+                        <div className="w-7 h-7 border-2 border-slate-300 border-t-sky-500 rounded-full animate-spin" />
+                        <span className="text-slate-400 text-xs tracking-wider">読み込み中...</span>
+                    </div>
+                ) : (
+                    <img
+                        src={characterState.imageSrc}
+                        alt="Character"
+                        className="w-full h-full object-contain object-bottom"
+                    />
+                )}
             </div>
 
             {/* 吹き出し（absolute でキャラの上に重ねてフロート表示） */}
             <div className="absolute top-2 left-0 right-0 z-10 px-1 pointer-events-none">
-                <div className="w-full bg-slate-50/95
-                                border-2 border-slate-600 px-2 py-1.5
-                                text-[10px] sm:text-xs font-medium text-slate-800 leading-snug text-center 
-                                max-h-[80px] overflow-y-auto"
-                                style={{ filter: 'url(#crayon-filter)' }}
+                <div
+                    className="w-full bg-slate-50/95
+                           border-2 border-slate-600 px-2 py-1.5
+                           text-[10px] sm:text-xs font-medium text-slate-800 leading-snug text-center 
+                           max-h-[80px] overflow-y-auto"
+                    style={{ filter: 'url(#crayon-filter)' }}
                 >
-                    {characterState.message}
+                    {loading ? (
+                        <span className="text-slate-400 italic">...</span>
+                    ) : (
+                        characterState.message
+                    )}
                 </div>
             </div>
 

@@ -84,7 +84,7 @@ export default function WeeklyCalendar({
             // 登録済みマス（「予定あり」含む）を押すと解除
             onSlotChange(dateStr, periodKey, null);
         } else if (busyTask) {
-            // ★ タスク未選択で空マスを押したら「予定あり」タスクのIDを割り当てる
+            // タスク未選択で空マスを押したら「予定あり」タスクのIDを割り当てる
             onSlotChange(dateStr, periodKey, busyTask.id);
         }
     };

@@ -14,7 +14,7 @@ const PERIODS = [
 ];
 
 /* ★ busySlots = [] を props に追加 */
-export default function TodayTasks({ calendarSlots }) {
+export default function TodayTasks({ calendarSlots, loading }) {
     // 日付 Context から一括取得
     const { todayStr, formattedToday } = useLogicalDate();
 
@@ -58,7 +58,11 @@ export default function TodayTasks({ calendarSlots }) {
 
                             {/* 下段：タスク表示エリア */}
                             <div className="w-full pl-1">
-                                {task?.title === '予定あり' ? (
+                                {loading ? (
+                                    <span className="text-[11px] text-slate-400 italic px-5">
+                                        読み込み中...
+                                    </span>
+                                ) : task?.title === '予定あり' ? (
                                     <div className="flex items-start gap-1.5">
                                         <span className="ml-1.5 w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0 inline-block translate-y-[1px]"></span>
                                         <span className="pl-1.5 text-slate-500 text-xs leading-none break-words">

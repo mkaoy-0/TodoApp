@@ -200,7 +200,10 @@ export default function Home() {
         <div className="flex-1 flex gap-0 sm:gap-0 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
           <div className="h-full aspect-[7/16.5] shrink-0 min-h-0">
-            <CharacterSection calendarSlots={calendarSlots} />
+            <CharacterSection 
+              calendarSlots={calendarSlots}
+              loading={loading}
+            />
           </div>
 
           {/* 右側: やることコンテナ */}

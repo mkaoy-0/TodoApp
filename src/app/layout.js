@@ -22,6 +22,14 @@ const myCustomFont = localFont({
 export const metadata = {
   title: "1週間のやることリスト",
   description: "1週間ごとのタスク管理ツール",
+  manifest: '/manifest.json',
+
+  // iPhone（Safari）向けの追加設定
+  appleWebApp: {
+    capable: true, // ホーム画面から開いた時にSafariのURLバーや戻るボタンを消す（全画面アプリ化）
+    statusBarStyle: 'default', // 上部ステータスバー（時計や電池）の表示スタイル
+    title: '=0w0=', // iPhoneのホーム画面アイコン下に表示されるデフォルト名
+  },
 };
 
 export default function RootLayout({ children }) {
