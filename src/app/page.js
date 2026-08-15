@@ -171,13 +171,13 @@ export default function Home() {
   return (
     /* h-screen の代わりに style={{ height: mainHeight }} を適用 */
     <main
-      className="w-full bg-slate-100 p-2 sm:p-4 flex flex-col box-border overflow-y-auto"
+      className="w-full bg-slate-100 p-1 sm:p-3 flex flex-col box-border overflow-y-auto"
       style={{ height: mainHeight }}
     >
       {/* ログアウトボタン（右上に配置） */}
       <button
         onClick={() => signOut()}
-        className="absolute top-2 right-2 z-50 text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded hover:bg-slate-300"
+        className="absolute top-2 right-2 z-50 text-[10px] bg-slate-300 text-slate-600 px-2 py-1 rounded hover:bg-slate-300 shadow-sm"
       >
         ログアウト
       </button>
@@ -199,7 +199,7 @@ export default function Home() {
          ========================================== */}
         <div className="flex-1 flex gap-0 sm:gap-0 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
-          <div className="h-full aspect-[7/16] shrink-0 min-h-0">
+          <div className="h-full aspect-[7/16.5] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
           </div>
 

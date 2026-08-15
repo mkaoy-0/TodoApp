@@ -26,12 +26,12 @@ export default function TaskContainer({
     return (
         /* 【外枠ベース】（※ここは傾けないことで、コンテンツの真っ直ぐな位置基準になります） */
         <div
-            className="relative rounded-2xl p-2 sm:p-3 h-full flex flex-col min-h-0 bg-transparent overflow-hidden"
+            className="relative rounded-2xl p-2 sm:p-3 h-full flex flex-col min-h-0 bg-transparent overflow-hidden -ml-1"
             onClick={onClearSelection}
         >
 
             {/* 【1層目：一番後ろ】少し左に傾けた色付きカード (-rotate-2) */}
-            <div className="absolute inset-0 -rotate-2 rounded-none bg-emerald-100 border border-emerald-200/60 shadow-sm pointer-events-none mt-1 mb-1" />
+            <div className="absolute inset-0 -rotate-2 rounded-none bg-sky-200 border border-emerald-200/60 shadow-sm pointer-events-none mt-1 mb-1" />
 
             {/* 【2層目：真ん中】少し右に傾け、さらに右寄りに配置した方眼紙カード (rotate-1 + left-3) */}
             <div
@@ -59,12 +59,12 @@ export default function TaskContainer({
                                 e.stopPropagation(); // 選択解除イベントの誤発火を防ぐ
                                 setActiveTab('today');
                             }}
-                            className={`relative inline-block -rotate-18 mt-0 pr-3 sm:pr-4 py-2 text-xs font-bold transition shadow-sm ${activeTab === 'today'
-                                ? 'bg-white text-emerald-700 pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-3.5 before:bg-emerald-400'
-                                : 'bg-slate-200 text-slate-600 hover:text-slate-800 pl-4'
+                            className={`relative inline-block -rotate-18 mt-0 pr-2 sm:pr-4 py-2 text-[11px] text-xs font-bold transition shadow-sm ${activeTab === 'today'
+                                ? 'bg-white text-amber-700 pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-3.5 before:bg-amber-400/70 text-left'
+                                : 'bg-slate-200 text-slate-600 hover:text-slate-800 pl-4 text-left'
                                 }`}
                         >
-                            今日やること
+                            今日<br />やること
                         </button>
                         <button
                             type="button"
@@ -72,12 +72,12 @@ export default function TaskContainer({
                                 e.stopPropagation();
                                 setActiveTab('weekly');
                             }}
-                            className={`relative inline-block -rotate-18 mt-1 pr-3 sm:pr-4 py-2 text-xs font-bold transition shadow-sm ${activeTab === 'weekly'
-                                ? 'bg-white text-blue-700 pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-3.5 before:bg-blue-400'
-                                : 'bg-slate-200 text-slate-600 hover:text-slate-800 pl-4'
+                            className={`relative inline-block -rotate-18 mt-1 pr-2 sm:pr-4 py-2 text-[11px] sm:text-xs font-bold transition shadow-sm ${activeTab === 'weekly'
+                                ? 'bg-white text-blue-700 pl-6 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-3.5 before:bg-blue-400 text-left'
+                                : 'bg-slate-200 text-slate-600 hover:text-slate-800 pl-4 text-left'
                                 }`}
                         >
-                            今週やること
+                            今週<br />やること
                         </button>
                     </div>
                 </div>

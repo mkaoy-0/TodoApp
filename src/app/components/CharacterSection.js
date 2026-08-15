@@ -53,7 +53,7 @@ export default function CharacterSection({ calendarSlots }) {
 
     return (
         /* 親要素に relative を指定して、吹き出しの配置基準にする */
-        <div className="relative h-full w-full overflow-hidden flex flex-col justify-end">
+        <div className="relative h-full w-full overflow-hidden flex flex-col justify-end -left-1">
 
             {/* キャラクター画像表示エリア（親の高さ100%を目一杯使って大きく表示） */}
             <div className="w-full h-full flex justify-center items-end overflow-hidden">

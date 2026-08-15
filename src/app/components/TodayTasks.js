@@ -32,8 +32,8 @@ export default function TodayTasks({ calendarSlots }) {
             <div className="flex items-center justify-between mb-2">
                 <span
                     className="inline-block -rotate-5 mt-3 mb-3
-                    text-[11px] font-bold text-emerald-700 
-                    bg-emerald-100 px-4.5 py-1.5 rounded-sm shadow-sm"
+                    text-[11px] font-bold text-sky-700 
+                    bg-sky-100 px-4.5 py-1.5 rounded-sm shadow-sm"
                 >
                     {formattedToday} の予定
                 </span>

@@ -36,7 +36,7 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                       focus-within:ring-1 focus-within:ring-slate-300 transition"
                     >
                         {/* 左端の緑色の縦帯 */}
-                        <div className="absolute left-0 top-0 bottom-0 w-3.5 bg-rose-400 shrink-0 pointer-events-none" />
+                        <div className="absolute left-0 top-0 bottom-0 w-3.5 bg-sky-400/70 shrink-0 pointer-events-none" />
 
                         {/* インプット本体（背景と枠線を透明にして親に馴染ませる） */}
                         <input
@@ -44,12 +44,12 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
                             placeholder="新しいやることを追加..."
-                            className="w-full pl-6 pr-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 bg-transparent appearance-none focus:outline-none"
+                            className="w-full pl-6 pr-3 py-1.5 text-[10px] sm:text-xs text-slate-900 placeholder:text-slate-400 bg-transparent appearance-none focus:outline-none"
                         />
                     </div>
                     <button
                         type="submit"
-                        className="translate-y-1.5 px-2 py-1 text-base 
+                        className="translate-y-1.5 px-1 sm:px-2 py-1 text-base 
                         border-2 border-blue-400/80 rounded-sm hover:bg-slate-200 
                         text-blue-400/80 font-bold transition active:scale-95 shrink-0"
                         style={{ filter: 'url(#crayon-filter)' }}
@@ -64,7 +64,7 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                 {loading ? (
                     <p className="text-center text-slate-400 py-2 text-xs">読み込み中...</p>
                 ) : (() => {
-                    /* ★ 「予定あり」以外のタスクだけに絞り込む */
+                    /* 「予定あり」以外のタスクだけに絞り込む */
                     const displayTasks = tasks.filter((task) => task.title !== '予定あり');
 
                     if (displayTasks.length === 0) {
@@ -102,7 +102,7 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
                                         e.stopPropagation();
                                         onDeleteTask(task.id);
                                     }}
-                                    className="text-slate-600 hover:text-red-600 px-1 text-xs transition font-medium shrink-0"
+                                    className="text-slate-600 hover:text-red-600 px-1 text-xs transition font-medium shrink-0 justify-center"
                                 >
                                     ✕
                                 </button>
