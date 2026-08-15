@@ -27,38 +27,55 @@ export default function CharacterSection({ calendarSlots }) {
     }, [calendarSlots, todayStr]);
 
     // 現在時刻のインデックスに応じたタスク名を出力
-    const dialogueMessage = useMemo(() => {
+    const characterState = useMemo(() => {
         const currentTask = todayTaskNames[periodIndex];
 
         if (currentTask === null) {
             // タスク設定してないとき
-            return "休憩中...";
+            return {
+                message: "休憩中...",
+                imageSrc: "/chara_break.png",
+            };
         } else if (currentTask === "予定あり") {
             // タスクが「予定あり」のとき
-            return "不在中...";
+            return {
+                message: "不在中...",
+                imageSrc: "/chara_out.png"
+            };
         } else {
-            return `今は${currentTask}の時間！`;
+            return {
+                message: `今は${currentTask}の時間！`,
+                imageSrc: "/chara_task.png"
+            };
         }
-        
+
     }, [todayTaskNames, periodIndex]);
 
     return (
-        /* h-full で左側エリアの高さを100%使い切り、縦並びに配置 */
-        <div className="p-2 sm:p-3 h-full flex flex-col items-center justify-between gap-2 overflow-hidden min-h-0">
-            {/* 吹き出し（下部に配置） */}
-            <div className="relative w-full bg-slate-50 border border-slate-200/80 rounded-lg sm:rounded-xl px-2 py-1.5 text-[10px] sm:text-xs font-medium text-slate-800 leading-snug text-center shrink-0 max-h-[80px] flex items-center justify-center overflow-y-auto">
-                {dialogueMessage}
-            </div>
+        /* 親要素に relative を指定して、吹き出しの配置基準にする */
+        <div className="relative h-full w-full overflow-hidden flex flex-col justify-end">
 
-            {/* キャラクター画像表示エリア（あまりの高さを目一杯使ってフィット） */}
-            <div className="w-full flex-1 min-h-0 flex justify-center items-end overflow-hidden">
+            {/* キャラクター画像表示エリア（親の高さ100%を目一杯使って大きく表示） */}
+            <div className="w-full h-full flex justify-center items-end overflow-hidden">
                 <img
-                    src="/character2.png"
+                    src={characterState.imageSrc}
                     alt="Character"
-                    /* 枠いっぱいに表示（枠の縦横比が固定されているため変に引き伸ばされない） */
                     className="w-full h-full object-contain object-bottom"
                 />
             </div>
+
+            {/* 吹き出し（absolute でキャラの上に重ねてフロート表示） */}
+            <div className="absolute top-2 left-0 right-0 z-10 px-1 pointer-events-none">
+                <div className="w-full bg-slate-50/95
+                                border-2 border-slate-600 px-2 py-1.5
+                                text-[10px] sm:text-xs font-medium text-slate-800 leading-snug text-center 
+                                max-h-[80px] overflow-y-auto"
+                                style={{ filter: 'url(#crayon-filter)' }}
+                >
+                    {characterState.message}
+                </div>
+            </div>
+
         </div>
     );
 }

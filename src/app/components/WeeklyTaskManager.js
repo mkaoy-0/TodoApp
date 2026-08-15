@@ -60,7 +60,7 @@ export default function WeeklyTaskManager({ tasks, onAddTask, onDeleteTask, load
             </form>
 
             {/* タスク一覧：flex-1 であまりの高さを100%使い切り、溢れたら overflow-y-auto でスクロール */}
-            <div className="flex-1 overflow-y-auto space-y-3 pt-1.5 pb-3 pr-1 min-h-0 ml-1.5 mt-2">
+            <div className="flex-1 overflow-y-auto space-y-3 pt-1.5 pb-3 pr-1 min-h-0 ml-2 mr-2 mt-2.5 mb-2.5">
                 {loading ? (
                     <p className="text-center text-slate-400 py-2 text-xs">読み込み中...</p>
                 ) : (() => {

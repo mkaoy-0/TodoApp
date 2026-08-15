@@ -4,6 +4,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+
+// 認証＆コンポーネントのインポート
+import AuthModal from './components/AuthModal';
+import { signOut } from './services/authService';
 
 // タスク用サービス
 import { fetchWeeklyTasks, createWeeklyTask, deleteWeeklyTaskById } from './services/taskService';
@@ -21,6 +26,9 @@ import CharacterSection from './components/CharacterSection';
 /*--------------------------*/
 
 export default function Home() {
+  const [session, setSession] = useState(null); // ログイン状態
+  const [authChecking, setAuthChecking] = useState(true); // 認証判定中フラグ
+
   // アプリ全体の「データ（状態）」を保持
   const [tasks, setTasks] = useState([]);
   const [calendarSlots, setCalendarSlots] = useState([]);
@@ -34,6 +42,28 @@ export default function Home() {
 
   // タブの状態を親で管理
   const [activeTab, setActiveTab] = useState('today');
+
+  // 1. ログイン状態の監視
+  useEffect(() => {
+    // 現在のセッションを取得
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthChecking(false);
+    });
+
+    // ログイン・ログアウトの変更をリアルタイム監視
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthChecking(false);
+      // トークンが自動更新されたりログイン完了した時に最新データを再取得する
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        loadAllData();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
 
   // データベースからタスクを読み込む
   const loadAllData = async () => {
@@ -49,9 +79,11 @@ export default function Home() {
 
   // --- 画面が開いたときに自動実行される処理 ---
   useEffect(() => {
-    loadAllData();
+    if (session) {
+      loadAllData();
+    }
 
-    // 2. 画面の実際の表示高さを正確に計算してセットする処理
+    // 画面の実際の表示高さを正確に計算してセットする処理
     const updateHeight = () => {
       if (typeof window !== 'undefined') {
         setMainHeight(`${window.innerHeight}px`);
@@ -63,7 +95,7 @@ export default function Home() {
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
 
-  }, []);
+  }, [session]);
 
   // タスクを追加する処理（WeeklyTaskManagerから呼ばれる）
   const handleAddTask = async (title) => {
@@ -121,12 +153,35 @@ export default function Home() {
     setSelectedTaskId(null);
   };
 
+  // 判定中の表示
+  if (authChecking) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-slate-100 text-slate-500 text-sm">
+        読み込み中...
+      </div>
+    );
+  }
+
+  // 未ログイン時はログイン画面（AuthModal）を返す
+  if (!session) {
+    return <AuthModal onLoginSuccess={() => loadAllData()} />;
+  }
+
+  // ログイン済みの場合はいつものカレンダー画面を返す
   return (
     /* h-screen の代わりに style={{ height: mainHeight }} を適用 */
     <main
       className="w-full bg-slate-100 p-2 sm:p-4 flex flex-col box-border overflow-y-auto"
       style={{ height: mainHeight }}
-    >      
+    >
+      {/* ログアウトボタン（右上に配置） */}
+      <button
+        onClick={() => signOut()}
+        className="absolute top-2 right-2 z-50 text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded hover:bg-slate-300"
+      >
+        ログアウト
+      </button>
+
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-2 sm:gap-3 min-h-[480px]">
         {/* 隠しSVGフィルター */}
         <svg className="hidden" aria-hidden="true">
@@ -142,9 +197,9 @@ export default function Home() {
           上部エリア (キャラ ＆ やること):
           十分な高さがある時は画面いっぱいに広がり(flex-1)
          ========================================== */}
-        <div className="flex-1 flex gap-1.5 sm:gap-2 min-h-[480px] overflow-hidden">
+        <div className="flex-1 flex gap-0 sm:gap-0 min-h-[480px] overflow-hidden">
           {/* 左側: キャラクター */}
-          <div className="h-full aspect-[2/5] shrink-0 min-h-0">
+          <div className="h-full aspect-[7/16] shrink-0 min-h-0">
             <CharacterSection calendarSlots={calendarSlots} />
           </div>
 

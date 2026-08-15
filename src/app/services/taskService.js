@@ -44,6 +44,14 @@ function generateUniqueColor(existingTasks) {
  * @returns {Promise<Array>} タスクの配列
  */
 export async function fetchWeeklyTasks() {
+    // 最新のユーザー情報・セッションが取得できるか事前に確認
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        // まだセッション復元中（または未ログイン）の場合はエラーを出さずに空配列を返す
+        return [];
+    }
+
     const { data, error } = await supabase
         .from('weekly_tasks')
         .select('*')

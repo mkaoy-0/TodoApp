@@ -8,6 +8,14 @@ import { supabase } from '../../lib/supabase';
  * @returns {Promise<Array>} カレンダーのスロット配列
  */
 export async function fetchCalendarSlots() {
+    // 最新のユーザー情報・セッションが取得できるか事前に確認
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        // まだセッション復元中の場合はエラーを出さずに空配列を返す
+        return [];
+    }
+
     const { data, error } = await supabase
         .from('calendar_slots')
         .select(`
@@ -36,18 +44,23 @@ export async function fetchCalendarSlots() {
  * @param {number|null} weeklyTaskId - 紐付けるタスクのID（解除時は null）
  */
 export async function updateCalendarSlot(date, period, weeklyTaskId) {
+    // ログイン中のユーザー情報を取得
+    const { data: { user } } = await supabase.auth.getUser();
+
     // upsert (存在すれば更新、なければ新規挿入) を行う
     const { data, error } = await supabase
         .from('calendar_slots')
         .upsert(
             [
                 {
+                    user_id: user.id,
                     date,
                     period,
                     weekly_task_id: weeklyTaskId, // 紐付けるタスクのID（解除時は null）
                 },
             ],
-            { onConflict: 'date, period' } // 日付と区分が重複したら更新する
+            // SQLのUNIQUE制約に合わせて user_id, date, period の3つを指定。重複したら更新
+            { onConflict: 'user_id, date, period' } 
         )
         .select(`
             id,
