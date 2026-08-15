@@ -45,10 +45,10 @@ export default function AuthModal({ onLoginSuccess }) {
 
     return (
         /* 画面の高さいっぱいに固定し、スクロールを完全禁止（overflow-hidden） */
-        <div className="h-screen w-full p-4 flex flex-col items-center justify-between overflow-hidden box-border">
+        <div className="h-screen w-full p-4 flex flex-col items-center justify-between overflow-hidden box-border bg-white text-slate-800">
 
             {/* ログインフォーム */}
-            <div className="w-full max-w-sm flex flex-col justify-start pt-2">
+            <div className="w-full max-w-sm flex flex-col justify-start pt-5">
                 <div
                     className="p-4 bg-white rounded-sm shadow-md border-2 border-slate-500 w-full"
                     style={{ filter: 'url(#crayon-filter)' }}
@@ -70,7 +70,7 @@ export default function AuthModal({ onLoginSuccess }) {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="例: tarou123"
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-800"
                             />
                         </div>
 
@@ -83,7 +83,7 @@ export default function AuthModal({ onLoginSuccess }) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="6文字以上"
-                                className="w-full px-3 py-2 border rounded-lg text-sm"
+                                className="w-full px-3 py-2 border rounded-lg text-sm bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-800"
                             />
                         </div>
 
