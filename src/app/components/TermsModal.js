@@ -75,6 +75,21 @@ export default function TermsModal({ isOpen, onClose }) {
                             <li>登録されたアカウントおよび保存されたデータは、開発者の判断により予告なく削除される場合があります。バックアップは保証されません。</li>
                         </ul>
                     </div>
+                    <div>
+                        <h4 className="font-bold text-slate-800 mb-1">6. 使用フォント・ライセンス表記</h4>
+                        <p className="text-slate-600">
+                            本サービスでは以下のフォントを使用しています。<br />
+                            チョークS<br />
+                            Modified by sozai-font-hako(https://font.cutegirl.jp/chalk-s.html)<br />
+                            Based on fonts by Fontworks Inc.<br />
+                            Copyright 2020 The Stick Project Authors(https://github.com/fontworks-fonts/Stick)<br />
+                            This Font Software is licensed under the SIL Open Font License, Version 1.1.(https://openfontlicense.org/)
+                        </p>
+                    </div>
+                    <div>
+                        <br />
+                        <p className="text-slate-800">2026-08-16</p>
+                    </div>
                 </div>
 
                 {/* フッター */}
