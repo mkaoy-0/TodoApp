@@ -83,6 +83,17 @@ export default function Home() {
   // --- 画面が開いたときに自動実行される処理 ---
   useEffect(() => {
     if (session) {
+      // Service Workerをブラウザに登録する
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('Service Worker 登録成功:', registration);
+          })
+          .catch((error) => {
+            console.error('Service Worker 登録失敗:', error);
+          });
+      }
+
       loadAllData();
       // プッシュ通知の購読登録を初期化
       registerPushSubscription();
