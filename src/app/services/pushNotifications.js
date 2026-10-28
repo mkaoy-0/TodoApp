@@ -13,7 +13,7 @@ function urlBase64ToUint8Array(base64String) {
 
 // Service Worker & 購読の登録
 export async function registerPushSubscription() {
-  console.log('1. 購読登録処理がスタートしました');
+  // console.log('1. 購読登録処理がスタートしました');
 
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
     console.log('中断: ブラウザがService Worker非対応です');
@@ -21,24 +21,24 @@ export async function registerPushSubscription() {
   }
 
   const permission = await Notification.requestPermission();
-  console.log('2. 通知権限の結果:', permission);
+ // console.log('2. 通知権限の結果:', permission);
   if (permission !== 'granted') {
     console.log('中断: 通知権限が許可されませんでした');
     return false;
   }
 
-  console.log('3. Service Workerの準備を待っています...');
+ // console.log('3. Service Workerの準備を待っています...');
   const registration = await navigator.serviceWorker.ready;
-  console.log('4. Service Workerの準備完了:', registration);
+ // console.log('4. Service Workerの準備完了:', registration);
 
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
   });
-  console.log('5. Pushプッシュ購読の取得成功:', subscription);
+ // console.log('5. Pushプッシュ購読の取得成功:', subscription);
 
   const { data: { user } } = await supabase.auth.getUser();
-  console.log('6. ログインユーザー情報:', user);
+  // console.log('6. ログインユーザー情報:', user);
   if (!user) {
     console.log('中断: ユーザーがログインしていません');
     return false;
@@ -50,11 +50,11 @@ export async function registerPushSubscription() {
   }, { onConflict: 'user_id' });
 
   if (error) {
-    console.error('7. Supabaseへの保存エラー:', error);
+    console.error('Supabaseへの保存エラー:', error);
     return false;
   }
 
-  console.log('8. データベースへの保存が成功しました！');
+ // console.log('データベースへの保存が成功しました！');
   return true;
 }
 
@@ -114,8 +114,6 @@ export async function schedulePeriodicNotifications(dateStr, tasksForDay) {
   }
 }
 
-// src/app/services/pushNotifications.js の一番下
-
 /**
  * 特定のタスクが「今の時間帯」に設定された際、すぐに通知データを作成する関数
  * （pg_cronが1分以内に自動で拾って送信してくれます）
@@ -132,7 +130,7 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   try {
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
-      title: '=0w0=.｡oO(テスト通知！)',
+      title: '=0w0=.｡oO(タスクの時間です!)',
       body: `${taskName}の時間だよ！`,
       scheduled_at: now.toISOString(), // 現在時刻
       status: 'pending',
@@ -144,55 +142,3 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
     console.error('登録失敗:', err);
   }
 }
-
-/**
- * 特定のタスクが「今の時間帯」に設定された際、すぐに通知をテスト・送信する関数
- */
-/*/
-export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, taskName) {
-  if (!taskName || taskName === '予定あり') return;
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  // 今日の日付文字列を取得
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const todayStr = `${year}-${month}-${day}`;
-
-  // 現在の「朝・昼・夜」のどれに該当するかを判定
-  const rawHour = now.getHours();
-  let currentPeriod = 'morning';
-  if (rawHour >= TIME_CONFIG.AFTERNOON_START && rawHour < TIME_CONFIG.NIGHT_START) {
-    currentPeriod = 'afternoon';
-  } else if (rawHour >= TIME_CONFIG.NIGHT_START || rawHour < TIME_CONFIG.MORNING_START) {
-    currentPeriod = 'night';
-  }
-
-  // もし「今日」かつ「現在の時間帯」のマスが変更された場合のみ、即座に通知を飛ばす
- // if (dateStr === todayStr && periodKey === currentPeriod) {
-    // すぐに送信されるように、scheduled_at を「現在時刻」にしてキューに挿入
-    await supabase.from('scheduled_notifications').insert({
-      user_id: user.id,
-      title: '=0w0=.｡oO(タスクの時間です!)',
-      body: `${taskName}をしよう！`,
-      scheduled_at: now.toISOString(),
-      status: 'pending',
-    });
-
-    // Supabase公式の functions.invoke を使ってCORSエラーを回避して安全に呼び出す！
-    try {
-      const { error } = await supabase.functions.invoke('send-push', {
-        body: {},
-      });
-
-      if (error) throw error;
-      console.log('即時通知トリガー成功！');
-    } catch (err) {
-      console.error('即時通知のトリガーに失敗しました:', err);
-    }
- // }
-}
-/**/
