@@ -2,6 +2,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { TIME_CONFIG } from '../../constants/TimeConfig';
 
 const DateContext = createContext(null);
 
@@ -32,12 +33,12 @@ export function DateProvider({ children }) {
     const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
     const formattedToday = `${adjusted.getMonth() + 1}月${adjusted.getDate()}日 (${dayNames[adjusted.getDay()]})`;
 
-    // 現在の時間帯インデックス（0: 朝 5:00-11:59, 1: 昼 12:00-17:59, 2: 夜 18:00-4:59）
+    // 現在の時間帯インデックス (0:朝, 1:昼, 2:夜) を計算
     const rawHour = now.getHours();
-    let hour_morning = 6; // 6:00 - 14:00
-    let hour_afternoon = 14; // 14:00 - 20:00
-    let hour_night = 20; // 20:00 - 6:00
-
+    let hour_morning = TIME_CONFIG.MORNING_START;
+    let hour_afternoon = TIME_CONFIG.AFTERNOON_START;
+    let hour_night = TIME_CONFIG.NIGHT_START;
+    
     let periodIndex = 0; // 朝
     if (rawHour >= hour_afternoon && rawHour < hour_night) {
       periodIndex = 1; // 昼

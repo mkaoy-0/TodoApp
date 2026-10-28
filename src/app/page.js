@@ -10,6 +10,9 @@ import { supabase } from '../lib/supabase';
 import AuthModal from './components/AuthModal';
 import { signOut } from './services/authService';
 
+// 通知用サービス
+import { registerPushSubscription, schedulePeriodicNotifications } from './services/pushNotifications';
+
 // タスク用サービス
 import { fetchWeeklyTasks, createWeeklyTask, deleteWeeklyTaskById } from './services/taskService';
 
@@ -81,6 +84,8 @@ export default function Home() {
   useEffect(() => {
     if (session) {
       loadAllData();
+      // プッシュ通知の購読登録を初期化
+      registerPushSubscription();
     }
 
     // 画面の実際の表示高さを正確に計算してセットする処理
@@ -128,18 +133,33 @@ export default function Home() {
   const handleSlotChange = async (date, period, weeklyTaskId) => {
     const updatedSlot = await updateCalendarSlot(date, period, weeklyTaskId);
     if (updatedSlot) {
+      let calculatedSlots = [];
       setCalendarSlots((prev) => {
         // 既存のスロットリストを更新、無ければ追加する
         const index = prev.findIndex(
           (s) => s.date === date && s.period === period
         );
+        let newSlots;
         if (index >= 0) {
-          const newSlots = [...prev];
+          // 既存の場所を更新する場合
+          newSlots = [...prev];
           newSlots[index] = updatedSlot;
-          return newSlots;
+        } else {
+          // 新しく追加する場合
+          newSlots = [...prev, updatedSlot];
         }
-        return [...prev, updatedSlot];
+        calculatedSlots = newSlots; // 更新後の配列を変数に退避
+        return newSlots;
       });
+
+      const periods = ['morning', 'afternoon', 'night'];
+      const tasksForDay = periods.map((p) => {
+        const slot = calculatedSlots.find((s) => s.date === date && s.period === p);
+        return slot?.weekly_tasks?.title || null;
+      });
+
+      // その日の通知スケジュールを更新
+      schedulePeriodicNotifications(date, tasksForDay);
     }
   };
 
