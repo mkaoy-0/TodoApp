@@ -160,6 +160,10 @@ export default function Home() {
 
       // その日の通知スケジュールを更新
       schedulePeriodicNotifications(date, tasksForDay);
+
+      // もし「今の時間帯」のマスを変更したなら、テストを兼ねて今すぐ通知を飛ばす
+      const changedTaskName = updatedSlot?.weekly_tasks?.title;
+      sendImmediateNotificationIfNeeded(date, period, changedTaskName);
     }
   };
 

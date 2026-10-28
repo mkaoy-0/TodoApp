@@ -90,3 +90,59 @@ export async function schedulePeriodicNotifications(dateStr, tasksForDay) {
     });
   }
 }
+
+// src/app/services/pushNotifications.js の中に追加
+
+/**
+ * 特定のタスクが「今の時間帯」に設定された際、すぐに通知をテスト・送信する関数
+ */
+export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, taskName) {
+  if (!taskName || taskName === '予定あり') return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // 今日の日付文字列を取得
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+
+  // 現在の「朝・昼・夜」のどれに該当するかを判定
+  const rawHour = now.getHours();
+  let currentPeriod = 'morning';
+  if (rawHour >= TIME_CONFIG.AFTERNOON_START && rawHour < TIME_CONFIG.NIGHT_START) {
+    currentPeriod = 'afternoon';
+  } else if (rawHour >= TIME_CONFIG.NIGHT_START || rawHour < TIME_CONFIG.MORNING_START) {
+    currentPeriod = 'night';
+  }
+
+  // もし「今日」かつ「現在の時間帯」のマスが変更された場合のみ、即座に通知を飛ばす
+  if (dateStr === todayStr && periodKey === currentPeriod) {
+    // すぐに送信されるように、scheduled_at を「現在時刻」にしてキューに挿入
+    await supabase.from('scheduled_notifications').insert({
+      user_id: user.id,
+      title: '=0w0=.｡oO(タスクの時間です!)',
+      body: `${taskName}をしよう！`,
+      scheduled_at: now.toISOString(),
+      status: 'pending',
+    });
+
+    // Supabaseの Edge Function（send-push）をその場で直接叩いて即時実行させる
+    try {
+      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL; // またはプロジェクトURL
+      // Anonキーまたはサービスロールキーを使って安全に叩く
+      await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Edge Function側で認証を求めていない、あるいはセッションがある場合はそのまま叩ける
+        },
+      });
+      console.log('即時通知トリガー成功！');
+    } catch (err) {
+      console.error('即時通知のトリガーに失敗しました:', err);
+    }
+  }
+}
