@@ -152,18 +152,13 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
       status: 'pending',
     });
 
-    // Supabaseの Edge Function（send-push）をその場で直接叩いて即時実行させる！
+    // Supabase公式の functions.invoke を使ってCORSエラーを回避して安全に呼び出す！
     try {
-      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; 
-
-      await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, // 認証ヘッダーを追加
-        },
+      const { error } = await supabase.functions.invoke('send-push', {
+        body: {},
       });
+
+      if (error) throw error;
       console.log('即時通知トリガー成功！');
     } catch (err) {
       console.error('即時通知のトリガーに失敗しました:', err);
