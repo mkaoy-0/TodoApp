@@ -114,11 +114,41 @@ export async function schedulePeriodicNotifications(dateStr, tasksForDay) {
   }
 }
 
-// src/app/services/pushNotifications.js の中に追加
+// src/app/services/pushNotifications.js の一番下
+
+/**
+ * 特定のタスクが「今の時間帯」に設定された際、すぐに通知データを作成する関数
+ * （pg_cronが1分以内に自動で拾って送信してくれます）
+ */
+export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, taskName) {
+  if (!taskName || taskName === '予定あり') return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const now = new Date();
+
+  try {
+    // 1分以内に pg_cron が送信するように、現在時刻でキューに挿入
+    const { error } = await supabase.from('scheduled_notifications').insert({
+      user_id: user.id,
+      title: '=0w0=.｡oO(タスクの時間です!)',
+      body: `${taskName}をしよう！`,
+      scheduled_at: now.toISOString(),
+      status: 'pending',
+    });
+
+    if (error) throw error;
+    console.log('即時通知の予約に成功しました！(1分以内に届きます)');
+  } catch (err) {
+    console.error('即時通知の予約に失敗しました:', err);
+  }
+}
 
 /**
  * 特定のタスクが「今の時間帯」に設定された際、すぐに通知をテスト・送信する関数
  */
+/*/
 export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, taskName) {
   if (!taskName || taskName === '予定あり') return;
 
@@ -165,3 +195,4 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
     }
  // }
 }
+/**/
