@@ -126,22 +126,22 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  // 確実に「現在時刻」で登録する（タイムゾーンのズレを防ぐためISO文字列を使用）
   const now = new Date();
 
   try {
-    // 1分以内に pg_cron が送信するように、現在時刻でキューに挿入
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
-      title: '=0w0=.｡oO(タスクの時間です!)',
-      body: `${taskName}をしよう！`,
-      scheduled_at: now.toISOString(),
+      title: '=0w0=.｡oO(テスト通知！)',
+      body: `${taskName}の時間だよ！`,
+      scheduled_at: now.toISOString(), // 現在時刻
       status: 'pending',
     });
 
     if (error) throw error;
-    console.log('即時通知の予約に成功しました！(1分以内に届きます)');
+    console.log('通知データを現在時刻で登録しました！');
   } catch (err) {
-    console.error('即時通知の予約に失敗しました:', err);
+    console.error('登録失敗:', err);
   }
 }
 
