@@ -206,6 +206,17 @@ export default function Home() {
         ログアウト
       </button>
 
+      <button 
+  onClick={async () => {
+    console.log('手動登録ボタンが押されました');
+    const result = await registerPushSubscription();
+    console.log('登録結果:', result);
+  }}
+  className="bg-blue-500 text-white p-2 rounded"
+>
+  手動で通知登録テスト
+</button>
+
       <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-2 sm:gap-3 min-h-[480px]">
         {/* 隠しSVGフィルター */}
         <svg className="hidden" aria-hidden="true">

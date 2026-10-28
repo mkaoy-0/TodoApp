@@ -13,25 +13,48 @@ function urlBase64ToUint8Array(base64String) {
 
 // Service Worker & 購読の登録
 export async function registerPushSubscription() {
-  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return false;
+  console.log('1. 購読登録処理がスタートしました');
+
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    console.log('中断: ブラウザがService Worker非対応です');
+    return false;
+  }
 
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return false;
+  console.log('2. 通知権限の結果:', permission);
+  if (permission !== 'granted') {
+    console.log('中断: 通知権限が許可されませんでした');
+    return false;
+  }
 
+  console.log('3. Service Workerの準備を待っています...');
   const registration = await navigator.serviceWorker.ready;
+  console.log('4. Service Workerの準備完了:', registration);
+
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
   });
+  console.log('5. Pushプッシュ購読の取得成功:', subscription);
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
+  console.log('6. ログインユーザー情報:', user);
+  if (!user) {
+    console.log('中断: ユーザーがログインしていません');
+    return false;
+  }
 
-  await supabase.from('push_subscriptions').upsert({
+  const { error } = await supabase.from('push_subscriptions').upsert({
     user_id: user.id,
     subscription: subscription.toJSON(),
   }, { onConflict: 'user_id' });
 
+  if (error) {
+    console.error('7. Supabaseへの保存エラー:', error);
+    return false;
+  }
+
+  console.log('8. データベースへの保存が成功しました！');
   return true;
 }
 
@@ -119,7 +142,7 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   }
 
   // もし「今日」かつ「現在の時間帯」のマスが変更された場合のみ、即座に通知を飛ばす
-  if (dateStr === todayStr && periodKey === currentPeriod) {
+ // if (dateStr === todayStr && periodKey === currentPeriod) {
     // すぐに送信されるように、scheduled_at を「現在時刻」にしてキューに挿入
     await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
@@ -129,20 +152,21 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
       status: 'pending',
     });
 
-    // Supabaseの Edge Function（send-push）をその場で直接叩いて即時実行させる
+    // Supabaseの Edge Function（send-push）をその場で直接叩いて即時実行させる！
     try {
-      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL; // またはプロジェクトURL
-      // Anonキーまたはサービスロールキーを使って安全に叩く
+      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; 
+
       await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Edge Function側で認証を求めていない、あるいはセッションがある場合はそのまま叩ける
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, // 認証ヘッダーを追加
         },
       });
       console.log('即時通知トリガー成功！');
     } catch (err) {
       console.error('即時通知のトリガーに失敗しました:', err);
     }
-  }
+ // }
 }
