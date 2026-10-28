@@ -11,7 +11,7 @@ import AuthModal from './components/AuthModal';
 import { signOut } from './services/authService';
 
 // 通知用サービス
-import { registerPushSubscription, schedulePeriodicNotifications } from './services/pushNotifications';
+import { registerPushSubscription, schedulePeriodicNotifications, sendImmediateNotificationIfNeeded } from './services/pushNotifications';
 
 // タスク用サービス
 import { fetchWeeklyTasks, createWeeklyTask, deleteWeeklyTaskById } from './services/taskService';
