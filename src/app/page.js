@@ -174,7 +174,7 @@ export default function Home() {
 
       // もし「今の時間帯」のマスを変更したなら、テストを兼ねて今すぐ通知を飛ばす
       const changedTaskName = updatedSlot?.weekly_tasks?.title;
-      sendImmediateNotificationIfNeeded(date, period, changedTaskName);
+      await sendImmediateNotificationIfNeeded(date, period, changedTaskName);
     }
   };
 

@@ -130,6 +130,22 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   const now = new Date();
 
   try {
+    // 直近1分以内に、同じ内容・同じユーザーの未送信（pending）通知が既に存在するか確認する
+    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000).toISOString();
+    
+    const { data: existing } = await supabase
+      .from('scheduled_notifications')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('body', `${taskName}の時間だよ！`)
+      .eq('status', 'pending')
+      .gte('scheduled_at', oneMinuteAgo);
+
+    if (existing && existing.length > 0) {
+      console.log('すでに同じ即時通知の予約が存在するため、重複作成をスキップします');
+      return;
+    }
+
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
       title: '=0w0=.｡oO(タスクの時間です!)',
