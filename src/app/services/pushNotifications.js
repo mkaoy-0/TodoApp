@@ -129,7 +129,31 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   // 確実に「現在時刻」で登録する（タイムゾーンのズレを防ぐためISO文字列を使用）
   const now = new Date();
 
+  // まず「今日の日付」と一致しているかチェックする
+  const todayStr = now.toISOString().split('T')[0];
+  if (dateStr !== todayStr) {
+    // 今日以外のカレンダー（明日や過去）を変更したときは、即時通知を送らない
+    return;
+  }
+
+  // 「今の時間帯」に一致しているかチェックする
+  const currentHour = now.getHours();
+  let currentPeriod = null;
+  if (currentHour >= TIME_CONFIG.MORNING_START && currentHour < TIME_CONFIG.AFTERNOON_START) {
+    currentPeriod = 'morning';
+  } else if (currentHour >= TIME_CONFIG.AFTERNOON_START && currentHour < TIME_CONFIG.NIGHT_START) {
+    currentPeriod = 'afternoon';
+  } else if (currentHour >= TIME_CONFIG.NIGHT_START || currentHour < TIME_CONFIG.MORNING_START) {
+    currentPeriod = 'night';
+  }
+
+  if (periodKey !== currentPeriod) {
+    // 今いる時間帯（朝・昼・夜）とは違うマスを変更したときは、即時通知を送らない！
+    return;
+  }
+
   try {
+    /*/
     // 直近1分以内に、同じ内容・同じユーザーの未送信（pending）通知が既に存在するか確認する
     const oneMinuteAgo = new Date(now.getTime() - 60 * 1000).toISOString();
     
@@ -145,6 +169,7 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
       console.log('すでに同じ即時通知の予約が存在するため、重複作成をスキップします');
       return;
     }
+    /**/
 
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
