@@ -126,18 +126,22 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 確実に「現在時刻」で登録する（タイムゾーンのズレを防ぐためISO文字列を使用）
+  // 日本時間（Asia/Tokyo）を基準にして、正確な「今日のJST日付」と「JSTの現在時刻（何時か）」を取得する
   const now = new Date();
+  const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+  
+  const year = jstNow.getFullYear();
+  const month = String(jstNow.getMonth() + 1).padStart(2, '0');
+  const day = String(jstNow.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
 
-  // まず「今日の日付」と一致しているかチェックする
-  const todayStr = now.toISOString().split('T')[0];
   if (dateStr !== todayStr) {
     // 今日以外のカレンダー（明日や過去）を変更したときは、即時通知を送らない
     return;
   }
 
-  // 「今の時間帯」に一致しているかチェックする
-  const currentHour = now.getHours();
+  // JSTでの現在の時間（何時か）を取得
+  const currentHour = jstNow.getHours();
   let currentPeriod = null;
   if (currentHour >= TIME_CONFIG.MORNING_START && currentHour < TIME_CONFIG.AFTERNOON_START) {
     currentPeriod = 'morning';
@@ -153,24 +157,6 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   }
 
   try {
-    /*/
-    // 直近1分以内に、同じ内容・同じユーザーの未送信（pending）通知が既に存在するか確認する
-    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000).toISOString();
-    
-    const { data: existing } = await supabase
-      .from('scheduled_notifications')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('body', `${taskName}の時間だよ！`)
-      .eq('status', 'pending')
-      .gte('scheduled_at', oneMinuteAgo);
-
-    if (existing && existing.length > 0) {
-      console.log('すでに同じ即時通知の予約が存在するため、重複作成をスキップします');
-      return;
-    }
-    /**/
-
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
       title: '=0w0=.｡oO(タスクの時間です!)',
