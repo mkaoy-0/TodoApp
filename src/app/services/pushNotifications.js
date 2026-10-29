@@ -126,21 +126,14 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 日本時間（Asia/Tokyo）を基準にして、正確な「今日のJST日付」と「JSTの現在時刻（何時か）」を取得する
   const now = new Date();
   const jstNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
   
   const year = jstNow.getFullYear();
   const month = String(jstNow.getMonth() + 1).padStart(2, '0');
   const day = String(jstNow.getDate()).padStart(2, '0');
-  const todayStr = `${year}-${month}-${day}`;
+  const todayStr = `${year}-${month}-${day}`; // 例: "2026-10-29"
 
-  if (dateStr !== todayStr) {
-    // 今日以外のカレンダー（明日や過去）を変更したときは、即時通知を送らない
-    return;
-  }
-
-  // JSTでの現在の時間（何時か）を取得
   const currentHour = jstNow.getHours();
   let currentPeriod = null;
   if (currentHour >= TIME_CONFIG.MORNING_START && currentHour < TIME_CONFIG.AFTERNOON_START) {
@@ -151,23 +144,60 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
     currentPeriod = 'night';
   }
 
-  if (periodKey !== currentPeriod) {
-    // 今いる時間帯（朝・昼・夜）とは違うマスを変更したときは、即時通知を送らない！
+  // ==========================================
+  // 🔍 ここで何が比較されているかコンソールに出力
+  // ==========================================
+  console.log('--- 【即時通知の判定チェック】 ---');
+  console.log('① 画面から渡ってきた日付 (dateStr):', dateStr);
+  console.log('② 計算された今日のJST日付 (todayStr):', todayStr);
+  console.log('③ 日付は一致しているか？:', dateStr === todayStr);
+  console.log('④ 画面から渡ってきた時間帯 (periodKey):', periodKey);
+  console.log('⑤ 現在のJST時間帯 (currentPeriod):', currentPeriod);
+  console.log('⑥ 時間帯は一致しているか？:', periodKey === currentPeriod);
+  console.log('-----------------------------------');
+
+  // 1. 今日以外のカレンダーを変更したときは即時通知を送らない
+  if (dateStr !== todayStr) {
+    console.log('👉 【判定結果】今日ではないため、即時通知をここでガード（中断）します！');
     return;
   }
 
+  // 2. 今の時間帯以外を変更したときは即時通知を送らない
+  if (periodKey !== currentPeriod) {
+    console.log('👉 【判定結果】現在の時間帯ではないため、即時通知をここでガード（中断）します！');
+    return;
+  }
+
+  console.log('👉 【判定結果】条件クリア！即時通知の登録処理に進みます。');
+
+  // --- 即時通知の登録処理 ---
   try {
+    const oneMinuteAgo = new Date(now.getTime() - 60 * 1000).toISOString();
+    
+    const { data: existing } = await supabase
+      .from('scheduled_notifications')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('body', `${taskName}の時間だよ！`)
+      .eq('status', 'pending')
+      .gte('scheduled_at', oneMinuteAgo);
+
+    if (existing && existing.length > 0) {
+      console.log('👉 1分以内の重複のためスキップします');
+      return;
+    }
+
     const { error } = await supabase.from('scheduled_notifications').insert({
       user_id: user.id,
       title: '=0w0=.｡oO(タスクの時間です!)',
       body: `${taskName}の時間だよ！`,
-      scheduled_at: now.toISOString(), // 現在時刻
+      scheduled_at: now.toISOString(),
       status: 'pending',
     });
 
     if (error) throw error;
-    console.log('通知データを現在時刻で登録しました！');
+    console.log('✅ 即時通知データを現在時刻で登録しました！');
   } catch (err) {
-    console.error('登録失敗:', err);
+    console.error('❌ 登録失敗:', err);
   }
 }
