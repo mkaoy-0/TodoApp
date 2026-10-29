@@ -145,30 +145,29 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
   }
 
   // ==========================================
-  // 🔍 ここで何が比較されているかコンソールに出力
+  // デバッグ用コンソールに出力
   // ==========================================
-  console.log('--- 【即時通知の判定チェック】 ---');
-  console.log('① 画面から渡ってきた日付 (dateStr):', dateStr);
-  console.log('② 計算された今日のJST日付 (todayStr):', todayStr);
-  console.log('③ 日付は一致しているか？:', dateStr === todayStr);
-  console.log('④ 画面から渡ってきた時間帯 (periodKey):', periodKey);
-  console.log('⑤ 現在のJST時間帯 (currentPeriod):', currentPeriod);
-  console.log('⑥ 時間帯は一致しているか？:', periodKey === currentPeriod);
-  console.log('-----------------------------------');
+  //console.log('--- 【即時通知の判定チェック】 ---');
+  //console.log('画面から渡ってきた日付 (dateStr):', dateStr);
+  //console.log('計算された今日のJST日付 (todayStr):', todayStr);
+  //console.log('日付は一致しているか？:', dateStr === todayStr);
+  //console.log('画面から渡ってきた時間帯 (periodKey):', periodKey);
+  //console.log('現在のJST時間帯 (currentPeriod):', currentPeriod);
+  //console.log('時間帯は一致しているか？:', periodKey === currentPeriod);
 
-  // 1. 今日以外のカレンダーを変更したときは即時通知を送らない
+  // 今日以外のカレンダーを変更したときは即時通知を送らない
   if (dateStr !== todayStr) {
-    console.log('👉 【判定結果】今日ではないため、即時通知をここでガード（中断）します！');
+    //console.log('今日ではないため、即時通知をここでガード');
     return;
   }
 
-  // 2. 今の時間帯以外を変更したときは即時通知を送らない
+  // 今の時間帯以外を変更したときは即時通知を送らない
   if (periodKey !== currentPeriod) {
-    console.log('👉 【判定結果】現在の時間帯ではないため、即時通知をここでガード（中断）します！');
+    //console.log('現在の時間帯ではないため、即時通知をここでガード');
     return;
   }
 
-  console.log('👉 【判定結果】条件クリア！即時通知の登録処理に進みます。');
+ // console.log('即時通知の登録処理へ');
 
   // --- 即時通知の登録処理 ---
   try {
@@ -183,7 +182,7 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
       .gte('scheduled_at', oneMinuteAgo);
 
     if (existing && existing.length > 0) {
-      console.log('👉 1分以内の重複のためスキップします');
+      console.log('1分以内の重複のためスキップ');
       return;
     }
 
@@ -196,8 +195,8 @@ export async function sendImmediateNotificationIfNeeded(dateStr, periodKey, task
     });
 
     if (error) throw error;
-    console.log('✅ 即時通知データを現在時刻で登録しました！');
+    console.log('即時通知データを現在時刻で登録しました！');
   } catch (err) {
-    console.error('❌ 登録失敗:', err);
+    console.error('登録失敗:', err);
   }
 }
