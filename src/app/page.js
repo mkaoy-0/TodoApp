@@ -169,8 +169,8 @@ export default function Home() {
         return slot?.weekly_tasks?.title || null;
       });
 
-      // その日の通知スケジュールを更新
-      schedulePeriodicNotifications(date, tasksForDay);
+      // その日の通知スケジュールを更新（awaitを追加して順番を確実に守る）
+      await schedulePeriodicNotifications(date, tasksForDay);
 
       // もし「今の時間帯」のマスを変更したなら、テストを兼ねて今すぐ通知を飛ばす
       const changedTaskName = updatedSlot?.weekly_tasks?.title;

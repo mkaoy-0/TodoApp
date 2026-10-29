@@ -94,9 +94,11 @@ export async function schedulePeriodicNotifications(dateStr, tasksForDay) {
       continue;
     }
 
-    // その時間帯の通知日時オブジェクトを作る (例: 2026-06-07T06:00:00)
-    const scheduledDate = new Date(`${dateStr}T00:00:00`);
-    scheduledDate.setHours(p.hour, 0, 0, 0);
+    // 日本時間（JST = UTC+9）を考慮して正確な UTC の Date を作る
+    const [year, month, day] = dateStr.split('-').map(Number);
+    // Date.UTC を使って、JSTの時間を正しく計算（JSTなので9時間引いたUTCにする）
+    const utcMs = Date.UTC(year, month - 1, day, p.hour - 9, 0, 0);
+    const scheduledDate = new Date(utcMs);
 
     // 既に過去の時間のときは予約しない
     if (scheduledDate <= new Date()) {
